@@ -1,2 +1,2 @@
-# TradingCoreModular
-TradingCore Multihreaded and Moduler
+# TradingCoreBase
+TradingCore Baseline
