@@ -93,7 +93,7 @@ namespace trading::app
             findExchange(config, "binance").executionEndpoint
         },
         orderManager {
-            binanceExecutionGateway, riskManager, positionManager
+            riskManager, positionManager, executionOrderQueue
         },
         strategyExecutor {
             orderManager, config.strategy.orderQuantity
@@ -104,15 +104,27 @@ namespace trading::app
         executionReportSource {
             findExchange(config, "binance").executionEndpoint
         },
-        marketEventHandler {
-            strategy, strategyExecutor, recorder
+        marketEventDispatcher {
+            strategyEventQueue, recordingEventQueue
         },
         bookBuilder {
-            config.instrument, orderBook, marketEventHandler
+            config.instrument, orderBook, marketEventDispatcher
+        },
+        bookBuilderWorker {
+            bookBuilder, bookUpdateQueue
+        },
+        strategyWorker {
+            strategy, strategyExecutor, strategyEventQueue
+        },
+        executionWorker {
+            binanceExecutionGateway,executionOrderQueue
+        },
+        recordingWorker {
+            recorder, recordingEventQueue
         },
         marketDataParser {},
         marketDataMessageHandler {
-            marketDataParser, bookBuilder
+            marketDataParser, bookUpdateQueue
         },
         marketDataSource {
             findExchange(config, "binance").marketDataEndpoint
@@ -145,6 +157,10 @@ namespace trading::app
         running = true;
 
         marketDataSource.start();
+        bookBuilderWorker.start();
+        strategyWorker.start();
+        executionWorker.start();
+        recordingWorker.start();
         executionReportSource.start();
     }
 
@@ -154,8 +170,11 @@ namespace trading::app
             return;
 
         executionReportSource.stop();
+        recordingWorker.stop();
+        executionWorker.stop();
+        strategyWorker.stop();
+        bookBuilderWorker.stop();
         marketDataSource.stop();
-
         running = false;
     }
 }

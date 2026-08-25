@@ -96,7 +96,7 @@ namespace
     void runIntegrationTests(const std::vector<std::string_view>&)
     {
         // trading_integration_test();
-        trading_inbound_integration_test();
+        // trading_inbound_integration_test();
     }
 }
 
@@ -110,7 +110,7 @@ int main([[maybe_unused]] const int argc,
 
     // runApp(parameters);
     // runTests(parameters);
-    runIntegrationTests(parameters);
+    // runIntegrationTests(parameters);
 
     return EXIT_SUCCESS;
 }

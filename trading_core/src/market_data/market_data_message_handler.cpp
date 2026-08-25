@@ -40,21 +40,18 @@ Description : market_data_message_handler.cpp
 namespace trading::market_data
 {
     MarketDataMessageHandler::MarketDataMessageHandler(IMarketDataParser& parser,
-                                                       IBookUpdateHandler& bookUpdateHandler) noexcept:
-        bookUpdates {},
+                                                       concurrency::Queue<BookUpdates>& bookUpdateQueue) noexcept:
         parser { parser },
-        bookUpdateHandler { bookUpdateHandler }
+        bookUpdateQueue { bookUpdateQueue }
     {
     }
 
     void MarketDataMessageHandler::onMessage(const std::string_view message)
     {
         bookUpdates.clear();
-
-        const ParseResult result = parser.parse(message, bookUpdates);
-        if (result != ParseResult::Success)
+        if (parser.parse(message, bookUpdates) != ParseResult::Success)
             return;
-        for (const auto& update : bookUpdates)
-            bookUpdateHandler.onBookUpdate(update);
+        if (!bookUpdates.empty())
+            bookUpdateQueue.push(std::move(bookUpdates));
     }
 }

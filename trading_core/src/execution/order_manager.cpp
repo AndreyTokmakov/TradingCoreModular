@@ -42,12 +42,12 @@ Description : order_manager.cpp
 
 namespace trading::execution
 {
-    OrderManager::OrderManager(IExecutionGateway& gateway,
-                               risk::IRiskManager& riskManager,
-                               position::PositionManager& positionManager) noexcept:
-        gateway { gateway },
+    OrderManager::OrderManager(risk::IRiskManager& riskManager,
+                               position::PositionManager& positionManager,
+                               concurrency::Queue<Order>& orderQueue) noexcept:
         riskManager { riskManager },
-        positionManager { positionManager }
+        positionManager { positionManager },
+        orderQueue {orderQueue}
     {
     }
 
@@ -87,8 +87,7 @@ namespace trading::execution
         if (!inserted)
             return std::unexpected(OrderCreationError::InvalidRequest);
 
-        gateway.send(it->second);
-
+        orderQueue.push(it->second);
         return orderId;
     }
 
@@ -120,7 +119,9 @@ namespace trading::execution
     {
         if (const auto it = orders.find(orderId); it == orders.end())
             return false;
-        gateway.cancel(orderId);
+
+        // TODO: Publish cancel Event
+        //  orderQueue.push(it->second);
 
         return true;
     }

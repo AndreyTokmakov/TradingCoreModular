@@ -76,6 +76,7 @@ Description : market_data_message_handler.hpp
 
 #include "interfaces/book_update_handler.hpp"
 #include "interfaces/market_data_parser.hpp"
+#include "queue.hpp"
 
 namespace trading::market_data
 {
@@ -89,14 +90,14 @@ namespace trading::market_data
     {
     public:
         MarketDataMessageHandler(IMarketDataParser& parser,
-                                 IBookUpdateHandler& bookUpdateHandler) noexcept;
+                                 concurrency::Queue<BookUpdates>& bookUpdateQueue) noexcept;
 
         void onMessage(std::string_view message) override;
 
     private:
         BookUpdates bookUpdates;
         IMarketDataParser& parser;
-        IBookUpdateHandler& bookUpdateHandler;
+        concurrency::Queue<BookUpdates>& bookUpdateQueue;
     };
 }
 

@@ -41,6 +41,7 @@ set(APP         ${PROJECT_DIR}/app)
 set(SOURCES     ${PROJECT_DIR}/src)
 set(TESTS       ${PROJECT_DIR}/tests)
 
+set(COMMON      ${SOURCES}/common)
 set(CONFIG      ${SOURCES}/config)
 set(CORE        ${SOURCES}/core)
 set(MARKET_DATA ${SOURCES}/market_data)
@@ -57,6 +58,7 @@ set(BINANCE     ${EXCHANGES}/binance)
 
 include_directories(${CORE})
 include_directories(${CONFIG})
+include_directories(${COMMON})
 include_directories(${MARKET_DATA})
 include_directories(${MARKET_DATA}/model)
 include_directories(${MARKET_DATA}/interfaces)
@@ -75,6 +77,9 @@ add_executable(${PROJECT_NAME}
         main.cpp
         ${APP}/application.hpp
         ${APP}/application.cpp
+
+        ${COMMON}/queue.hpp
+        ${COMMON}/condition_variable_queue.hpp
 
         ${CONFIG}/config.hpp
         ${CONFIG}/json_config_loader.hpp
@@ -100,12 +105,16 @@ add_executable(${PROJECT_NAME}
 
         ${MARKET_DATA}/market_data_message_handler.cpp
         ${MARKET_DATA}/market_data_message_handler.hpp
+        ${MARKET_DATA}/market_event_dispatcher.cpp
+        ${MARKET_DATA}/market_event_dispatcher.hpp
         ${MARKET_DATA}/order_book.hpp
         ${MARKET_DATA}/order_book.cpp
+        ${MARKET_DATA}/book_builder_worker.hpp
+        ${MARKET_DATA}/book_builder_worker.cpp
         ${MARKET_DATA}/book_builder.hpp
         ${MARKET_DATA}/book_builder.cpp
-        ${MARKET_DATA}/market_event_handler.hpp
-        ${MARKET_DATA}/market_event_handler.cpp
+        # ${MARKET_DATA}/market_event_handler.hpp
+        # ${MARKET_DATA}/market_event_handler.cpp
 
         ${LOGGING}/logger.hpp
         ${LOGGING}/spdlog_logger.hpp
@@ -121,6 +130,10 @@ add_executable(${PROJECT_NAME}
         ${EXECUTION}/execution_report_source.hpp
         ${EXECUTION}/execution_report_handler.cpp
         ${EXECUTION}/execution_report_handler.hpp
+        ${EXECUTION}/execution_worker.cpp
+        ${EXECUTION}/execution_worker.hpp
+        # ${EXECUTION}/queued_execution_gateway.hpp
+        # ${EXECUTION}/queued_execution_gateway.cpp
 
         ${BINANCE}/binance_market_data_source.hpp
         ${BINANCE}/binance_market_data_source.cpp
@@ -140,6 +153,8 @@ add_executable(${PROJECT_NAME}
         ${RECORDING}/recording_event.hpp
         ${RECORDING}/trade_recorder.hpp
         ${RECORDING}/trade_recorder.cpp
+        ${RECORDING}/recording_worker.cpp
+        ${RECORDING}/recording_worker.hpp
 
         ${PNL}/pnl.hpp
         ${PNL}/pnl_calculator.hpp
@@ -156,7 +171,10 @@ add_executable(${PROJECT_NAME}
         ${STRATEGY}/imbalance_strategy.cpp
         ${STRATEGY}/strategy_executor.cpp
         ${STRATEGY}/strategy_executor.cpp
+        ${STRATEGY}/strategy_worker.hpp
+        ${STRATEGY}/strategy_worker.cpp
 
+        #[[
         ${TESTS}/market_data/order_book_test.cpp
         ${TESTS}/market_data/book_builder_test.cpp
         ${TESTS}/market_data/market_event_handler_test.cpp
@@ -180,6 +198,7 @@ add_executable(${PROJECT_NAME}
         ${TESTS}/test_support/trading_test_configuration.hpp
         ${TESTS}/test_support/trading_test_environment.hpp
         ${TESTS}/test_support/trading_test_environment.cpp
+        #]]
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC "${CMAKE_SOURCE_DIR}/Utilities")

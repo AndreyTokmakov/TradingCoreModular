@@ -65,15 +65,20 @@ Description : application.hpp
 #include "binance_market_data_source.hpp"
 
 #include "book_builder.hpp"
+#include "book_builder_worker.hpp"
+#include "condition_variable_queue.hpp"
 #include "execution_report_handler.hpp"
+#include "execution_worker.hpp"
 #include "imbalance_strategy.hpp"
 #include "market_data_message_handler.hpp"
-#include "market_event_handler.hpp"
+#include "market_event_dispatcher.hpp"
 #include "order_book.hpp"
 #include "order_manager.hpp"
 #include "position_manager.hpp"
+#include "recording_worker.hpp"
 #include "risk_manager.hpp"
 #include "strategy_executor.hpp"
+#include "strategy_worker.hpp"
 #include "trade_recorder.hpp"
 
 namespace trading::app
@@ -98,6 +103,11 @@ namespace trading::app
         void configureMarketData();
         void configureExecutionReports();
 
+
+        concurrency::ConditionVariableQueue<market_data::BookUpdates> bookUpdateQueue;
+        concurrency::ConditionVariableQueue<market_data::MarketEvent> strategyEventQueue;
+        concurrency::ConditionVariableQueue<market_data::MarketEvent> recordingEventQueue;
+        concurrency::ConditionVariableQueue<execution::Order> executionOrderQueue;
         config::Config config;
 
         market_data::OrderBook orderBook;
@@ -114,8 +124,13 @@ namespace trading::app
         execution::ExecutionReportHandler executionReportHandler;
         exchanges::binance::BinanceExecutionReportSource executionReportSource;
 
-        market_data::MarketEventHandler marketEventHandler;
+        market_data::MarketEventDispatcher marketEventDispatcher;
         market_data::BookBuilder bookBuilder;
+        market_data::BookBuilderWorker bookBuilderWorker;
+
+        strategy::StrategyWorker strategyWorker;
+        execution::ExecutionWorker executionWorker;
+        recording::RecordingWorker recordingWorker;
 
         exchanges::binance::BinanceMarketDataParser marketDataParser;
         market_data::MarketDataMessageHandler marketDataMessageHandler;
