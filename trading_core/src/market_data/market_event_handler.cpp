@@ -31,31 +31,13 @@ Description : market_event_handler.cpp
 
 namespace trading::market_data
 {
-    MarketEventHandler::MarketEventHandler(strategy::IStrategy& strategy,
-                                           strategy::StrategyExecutor& executor,
-                                           recording::IRecorder& recorder) noexcept :
-        strategy { strategy },
-        executor { executor },
-        recorder { recorder }
+    MarketEventHandler::MarketEventHandler(concurrency::Queue<MarketEvent>& marketEventQueue) noexcept :
+        marketEventQueue { marketEventQueue }
     {
     }
 
     void MarketEventHandler::onMarketEvent(const MarketEvent& event)
     {
-        recorder.record(event);
-        const strategy::Signal signal = strategy.evaluate(event);
-        const strategy::StrategyExecutionResult result = executor.execute(signal, event);
-        if (!result) {
-            // TODO:  Order creation failed.  log / metrics / risk event.
-            return;
-        }
-
-        if (!result->has_value())
-            return;
-
-        [[maybe_unused]]
-        const OrderId orderId = result->value();
-
-        // TODO: Order was successfully created.  ----> log / metrics -
+        marketEventQueue.push(event);
     }
 }

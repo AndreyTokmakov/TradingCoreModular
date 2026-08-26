@@ -56,25 +56,23 @@ Description : Strategy signal execution component implementation.
 
 namespace trading::strategy
 {
-    using execution::OrderRequest;
-
-
-    StrategyExecutor::StrategyExecutor(execution::OrderManager& orderManager,
+    StrategyExecutor::StrategyExecutor(concurrency::Queue<execution::OrderRequest>& orderQueue,
                                        const Quantity orderQuantity) noexcept :
-        orderManager { orderManager }, orderQuantity { orderQuantity }
+        orderQueue { orderQueue },
+        orderQuantity { orderQuantity }
     {
     }
 
-    StrategyExecutionResult StrategyExecutor::execute(const Signal signal,
-                                                      const market_data::MarketEvent& event) const
+    void StrategyExecutor::execute(const Signal signal,
+                                   const market_data::MarketEvent& event) const
     {
         if (signal == Signal::None)
-            return std::optional<OrderId> {};
+            return;
 
         const Side side = signal == Signal::Buy ? Side::Buy : Side::Sell;
         const Price price = signal == Signal::Buy ? event.bestAsk : event.bestBid;
 
-        const OrderRequest request {
+        const execution::OrderRequest request {
             .instrument = event.instrument,
             .side = side,
             .type = OrderType::Limit,
@@ -82,10 +80,6 @@ namespace trading::strategy
             .quantity = orderQuantity
         };
 
-        const execution::OrderCreationResult result = orderManager.createOrder(request);
-        if (!result)
-            return std::unexpected(result.error());
-
-        return *result;
+        orderQueue.push(request);
     }
 }

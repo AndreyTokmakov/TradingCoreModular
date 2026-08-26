@@ -107,7 +107,8 @@ namespace trading::app
         concurrency::ConditionVariableQueue<market_data::BookUpdates> bookUpdateQueue;
         concurrency::ConditionVariableQueue<market_data::MarketEvent> strategyEventQueue;
         concurrency::ConditionVariableQueue<market_data::MarketEvent> recordingEventQueue;
-        concurrency::ConditionVariableQueue<execution::Order> executionOrderQueue;
+        concurrency::ConditionVariableQueue<execution::OrderRequest>  executionOrderQueue;
+
         config::Config config;
 
         market_data::OrderBook orderBook;
@@ -119,7 +120,10 @@ namespace trading::app
 
         exchanges::binance::BinanceExecutionGateway binanceExecutionGateway;
         execution::OrderManager orderManager;
+        // execution::OrderCommandProcessor orderCommandProcessor;
+        execution::ExecutionWorker executionWorker;
         strategy::StrategyExecutor strategyExecutor;
+        strategy::StrategyWorker strategyWorker;
 
         execution::ExecutionReportHandler executionReportHandler;
         exchanges::binance::BinanceExecutionReportSource executionReportSource;
@@ -128,8 +132,7 @@ namespace trading::app
         market_data::BookBuilder bookBuilder;
         market_data::BookBuilderWorker bookBuilderWorker;
 
-        strategy::StrategyWorker strategyWorker;
-        execution::ExecutionWorker executionWorker;
+
         recording::RecordingWorker recordingWorker;
 
         exchanges::binance::BinanceMarketDataParser marketDataParser;

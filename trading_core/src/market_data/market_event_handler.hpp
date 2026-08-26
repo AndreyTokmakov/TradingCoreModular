@@ -72,16 +72,12 @@ namespace trading::market_data
     class MarketEventHandler final : public IMarketEventHandler
     {
     public:
-        MarketEventHandler(strategy::IStrategy& strategy,
-                           strategy::StrategyExecutor& executor,
-                           recording::IRecorder& recorder) noexcept;
+        explicit MarketEventHandler(concurrency::Queue<MarketEvent>& marketEventQueue) noexcept;
 
         void onMarketEvent(const MarketEvent& event) override;
 
     private:
-        strategy::IStrategy& strategy;
-        strategy::StrategyExecutor& executor;
-        recording::IRecorder& recorder;
+        concurrency::Queue<MarketEvent>& marketEventQueue;
     };
 }
 

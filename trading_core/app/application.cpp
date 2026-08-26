@@ -79,7 +79,7 @@ namespace
 
 namespace trading::app
 {
-    Application::Application(const std::filesystem::path& configPath):
+Application::Application(const std::filesystem::path& configPath):
         config { loadConfig(configPath) },
         orderBook {},
         recorder {},
@@ -92,11 +92,17 @@ namespace trading::app
         binanceExecutionGateway {
             findExchange(config, "binance").executionEndpoint
         },
-        orderManager {
-            riskManager, positionManager, executionOrderQueue
+        orderManager {                                                 // CPU-3:  OrderManager --> gateway.send() / cancel()
+            riskManager, positionManager, binanceExecutionGateway
+        },
+        executionWorker {                                             // CPU-3: executionOrderQueue --> ExecutionWorker --> OrderManager::createOrder()
+            executionOrderQueue, orderManager
         },
         strategyExecutor {
-            orderManager, config.strategy.orderQuantity
+            executionOrderQueue, config.strategy.orderQuantity     // CPU-2: StrategyExecutor   --> executionOrderQueue::push()
+        },
+        strategyWorker {                                              // CPU-2: strategyEventQueue --> StrategyProcessor -> ImbalanceStrategy::evaluate()
+            strategyEventQueue, strategy, strategyExecutor   //                                                 -> StrategyExecutor::execute()
         },
         executionReportHandler {
             orderManager, positionManager, recorder
@@ -104,35 +110,28 @@ namespace trading::app
         executionReportSource {
             findExchange(config, "binance").executionEndpoint
         },
-        marketEventDispatcher {
-            strategyEventQueue, recordingEventQueue
+        marketEventDispatcher {                                        // CPU-1: MarketEventDispatcher   -->   strategyEventQueue::push()
+            strategyEventQueue, recordingEventQueue              //                                -->   recordingEventQueue::push()
         },
         bookBuilder {
-            config.instrument, orderBook, marketEventDispatcher
-        },
+            config.instrument, orderBook, marketEventDispatcher  // CPU-1: BookBuilder        --> OrderBook::onBookUpdate()
+        },                                                             //                           --> MarketEventDispatcher::onMarketEvent()
         bookBuilderWorker {
-            bookBuilder, bookUpdateQueue
+            bookBuilder, bookUpdateQueue                         // CPU-1: bookUpdateQueue    --> BookBuilderWorker --> BookBuilder
         },
-        strategyWorker {
-            strategy, strategyExecutor, strategyEventQueue
-        },
-        executionWorker {
-            binanceExecutionGateway,executionOrderQueue
-        },
-        recordingWorker {
+        recordingWorker {                                              // CPU-4:
             recorder, recordingEventQueue
         },
-        marketDataParser {},
-        marketDataMessageHandler {
+        marketDataParser {},                                           // CPU-0:  MarketDataMessageHandler  --> BinanceMarketDataParser -- > bookUpdateQueue.push();
+        marketDataMessageHandler {                                     // CPU-0:  MarketDataSource --> MarketDataMessageHandler
             marketDataParser, bookUpdateQueue
         },
-        marketDataSource {
+        marketDataSource {                                             // CPU-0:  Exchange --> MarketDataSource
             findExchange(config, "binance").marketDataEndpoint
         }
     {
         configureMarketData();
     }
-
     Application::~Application()
     {
         stop();
@@ -156,8 +155,8 @@ namespace trading::app
 
         running = true;
 
-        marketDataSource.start();
-        bookBuilderWorker.start();
+        marketDataSource.start();    // CPU-0
+        bookBuilderWorker.start();   // CPU-1
         strategyWorker.start();
         executionWorker.start();
         recordingWorker.start();

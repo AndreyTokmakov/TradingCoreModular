@@ -245,11 +245,11 @@ Description : order_manager.hpp
 #include <expected>
 #include <map>
 
+#include "execution_gateway.hpp"
 #include "execution_report.hpp"
 #include "order.hpp"
 #include "risk_manager.hpp"
 #include "position_manager.hpp"
-#include "queue.hpp"
 
 namespace trading::execution
 {
@@ -266,7 +266,7 @@ namespace trading::execution
     public:
         OrderManager(risk::IRiskManager& riskManager,
                      position::PositionManager& positionManager,
-                     concurrency::Queue<Order>& orderQueue) noexcept;
+                     IExecutionGateway& gateway) noexcept;
 
         [[nodiscard]]
         OrderCreationResult createOrder(const OrderRequest& request);
@@ -290,7 +290,7 @@ namespace trading::execution
     private:
         risk::IRiskManager& riskManager;
         position::PositionManager& positionManager;
-        concurrency::Queue<Order>& orderQueue;
+        IExecutionGateway& gateway;
 
         std::map<OrderId, Order> orders;
         OrderId nextOrderId { 1 };

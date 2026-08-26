@@ -10,8 +10,7 @@ Description : Sends orders to the exchange on the execution thread.
 #ifndef FINANCETECHNOLOGYPROJECTS_EXECUTION_WORKER_HPP
 #define FINANCETECHNOLOGYPROJECTS_EXECUTION_WORKER_HPP
 
-#include "execution_gateway.hpp"
-#include "order.hpp"
+#include "order_manager.hpp"
 #include "queue.hpp"
 
 #include <thread>
@@ -21,8 +20,8 @@ namespace trading::execution
     class ExecutionWorker final
     {
     public:
-        ExecutionWorker(IExecutionGateway& gateway,
-                        concurrency::Queue<Order>& queue);
+        ExecutionWorker(concurrency::Queue<OrderRequest>& orderQueue,
+                        OrderManager& orderManager);
 
         ~ExecutionWorker();
 
@@ -39,8 +38,8 @@ namespace trading::execution
     private:
         void run() const;
 
-        IExecutionGateway& gateway;
-        concurrency::Queue<Order>& queue;
+        concurrency::Queue<OrderRequest>& orderQueue;
+        OrderManager& orderManager;
 
         std::jthread worker;
         bool running { false };

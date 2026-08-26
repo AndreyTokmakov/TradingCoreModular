@@ -82,22 +82,20 @@ Description : Strategy signal execution component.
 #include "quantity.hpp"
 #include "order_manager.hpp"
 #include "model/market_event.hpp"
+#include "queue.hpp"
 
 namespace trading::strategy
 {
-    using StrategyExecutionResult = std::expected<std::optional<OrderId>, execution::OrderCreationError>;
-
     class StrategyExecutor final
     {
     public:
-        StrategyExecutor(execution::OrderManager& orderManager,
+        StrategyExecutor(concurrency::Queue<execution::OrderRequest>& orderQueue,
                          Quantity orderQuantity) noexcept;
 
-        [[nodiscard]]
-        StrategyExecutionResult execute(Signal signal, const market_data::MarketEvent& event) const;
+        void execute(Signal signal, const market_data::MarketEvent& event) const;
 
     private:
-        execution::OrderManager& orderManager;
+        concurrency::Queue<execution::OrderRequest>& orderQueue;
         Quantity orderQuantity;
     };
 }

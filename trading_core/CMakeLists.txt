@@ -133,8 +133,7 @@ add_executable(${PROJECT_NAME}
         ${EXECUTION}/execution_report_handler.hpp
         ${EXECUTION}/execution_worker.cpp
         ${EXECUTION}/execution_worker.hpp
-        # ${EXECUTION}/queued_execution_gateway.hpp
-        # ${EXECUTION}/queued_execution_gateway.cpp
+        ${EXECUTION}/execution_work_item.hpp
 
         ${BINANCE}/binance_market_data_source.hpp
         ${BINANCE}/binance_market_data_source.cpp

@@ -11,17 +11,16 @@ Description : Executes strategy processing on the strategy thread.
 
 namespace trading::strategy
 {
-    StrategyWorker::StrategyWorker(IStrategy& strategy,
-                                   StrategyExecutor& executor,
-                                   concurrency::Queue<market_data::MarketEvent>& queue):
+    StrategyWorker::StrategyWorker(concurrency::Queue<market_data::MarketEvent>& marketEventQueue,
+                                         IStrategy& strategy,
+                                         StrategyExecutor& executor) noexcept :
+        marketEventQueue { marketEventQueue },
         strategy { strategy },
-        executor { executor },
-        queue { queue }
+        executor { executor }
     {
     }
 
-    StrategyWorker::~StrategyWorker()
-    {
+    StrategyWorker::~StrategyWorker() {
         stop();
     }
 
@@ -37,7 +36,7 @@ namespace trading::strategy
     {
         if (!running)
             return;
-        queue.close();
+        marketEventQueue.close();
         if (worker.joinable())
             worker.join();
         running = false;
@@ -45,23 +44,21 @@ namespace trading::strategy
 
     void StrategyWorker::run() const
     {
-        market_data::MarketEvent event;
-
-        while (queue.waitPop(event))
+        market_data::MarketEvent event {};
+        while (marketEventQueue.waitPop(event))
         {
             const Signal signal = strategy.evaluate(event);
+            executor.execute(signal, event);
+            /*
             const StrategyExecutionResult result = executor.execute(signal, event);
-
-            if (!result)
-            {
+            if (!result) {
                 // TODO: log / metrics / risk event.
                 continue;
             }
-
             if (!result->has_value())
                 continue;
-
             // TODO: order-created event / metrics.
+            */
         }
     }
 }

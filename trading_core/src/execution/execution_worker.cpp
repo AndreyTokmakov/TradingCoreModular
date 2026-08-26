@@ -11,10 +11,10 @@ Description : Sends orders to the exchange on the execution thread.
 
 namespace trading::execution
 {
-    ExecutionWorker::ExecutionWorker(IExecutionGateway& gateway,
-                                     concurrency::Queue<Order>& queue):
-        gateway { gateway },
-        queue { queue }
+    ExecutionWorker::ExecutionWorker(concurrency::Queue<OrderRequest>& orderQueue,
+                                     OrderManager& orderManager):
+        orderQueue { orderQueue },
+        orderManager { orderManager }
     {
     }
 
@@ -36,7 +36,7 @@ namespace trading::execution
     {
         if (!running)
             return;
-        queue.close();
+        orderQueue.close();
         if (worker.joinable())
             worker.join();
         running = false;
@@ -44,9 +44,9 @@ namespace trading::execution
 
     void ExecutionWorker::run() const
     {
-        Order order;
-        while (queue.waitPop(order)) {
-            gateway.send(order);
+        OrderRequest request {};
+        while (orderQueue.waitPop(request)) {
+            orderManager.createOrder(request);
         }
     }
 }

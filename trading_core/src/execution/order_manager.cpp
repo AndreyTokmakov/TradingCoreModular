@@ -44,10 +44,10 @@ namespace trading::execution
 {
     OrderManager::OrderManager(risk::IRiskManager& riskManager,
                                position::PositionManager& positionManager,
-                               concurrency::Queue<Order>& orderQueue) noexcept:
+                               IExecutionGateway& gateway) noexcept:
         riskManager { riskManager },
         positionManager { positionManager },
-        orderQueue {orderQueue}
+        gateway { gateway }
     {
     }
 
@@ -87,7 +87,7 @@ namespace trading::execution
         if (!inserted)
             return std::unexpected(OrderCreationError::InvalidRequest);
 
-        orderQueue.push(it->second);
+        gateway.send(it->second);
         return orderId;
     }
 
@@ -119,9 +119,7 @@ namespace trading::execution
     {
         if (const auto it = orders.find(orderId); it == orders.end())
             return false;
-
-        // TODO: Publish cancel Event
-        //  orderQueue.push(it->second);
+        gateway.cancel(orderId);
 
         return true;
     }
