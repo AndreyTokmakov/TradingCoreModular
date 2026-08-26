@@ -18,30 +18,6 @@ namespace trading::market_data
     {
     }
 
-    BookBuilderWorker::~BookBuilderWorker()
-    {
-        stop();
-    }
-
-    void BookBuilderWorker::start()
-    {
-        if (running)
-            return;
-
-        running = true;
-        worker = std::jthread { &BookBuilderWorker::run, this };
-    }
-
-    void BookBuilderWorker::stop() noexcept
-    {
-        if (!running)
-            return;
-        queue.close();
-        if (worker.joinable())
-            worker.join();
-        running = false;
-    }
-
     void BookBuilderWorker::run() const
     {
         BookUpdates updates;

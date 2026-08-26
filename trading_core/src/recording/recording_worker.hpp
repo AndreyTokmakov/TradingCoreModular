@@ -13,37 +13,20 @@ Description : Records market events on the recording thread.
 #include "market_event.hpp"
 #include "queue.hpp"
 #include "recorder.hpp"
-
-#include <thread>
+#include <worker.hpp>
 
 namespace trading::recording
 {
-    class RecordingWorker final
-    {
+    class RecordingWorker final: public common::Worker<RecordingWorker> {
     public:
         RecordingWorker(IRecorder& recorder,
                         concurrency::Queue<market_data::MarketEvent>& queue);
 
-        ~RecordingWorker();
-
-        RecordingWorker(const RecordingWorker&) = delete;
-        RecordingWorker& operator=(const RecordingWorker&) = delete;
-
-        RecordingWorker(RecordingWorker&&) = delete;
-        RecordingWorker& operator=(RecordingWorker&&) = delete;
-
-        void start();
-
-        void stop() noexcept;
-
-    private:
         void run() const;
 
+    private:
         IRecorder& recorder;
         concurrency::Queue<market_data::MarketEvent>& queue;
-
-        std::jthread worker;
-        bool running { false };
     };
 }
 

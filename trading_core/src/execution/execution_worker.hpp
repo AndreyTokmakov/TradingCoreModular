@@ -12,37 +12,22 @@ Description : Sends orders to the exchange on the execution thread.
 
 #include "order_manager.hpp"
 #include "queue.hpp"
-
-#include <thread>
+#include "worker.hpp"
 
 namespace trading::execution
 {
-    class ExecutionWorker final
+    class ExecutionWorker final: public common::Worker<ExecutionWorker>
     {
     public:
         ExecutionWorker(concurrency::Queue<OrderRequest>& orderQueue,
                         OrderManager& orderManager);
 
-        ~ExecutionWorker();
-
-        ExecutionWorker(const ExecutionWorker&) = delete;
-        ExecutionWorker& operator=(const ExecutionWorker&) = delete;
-
-        ExecutionWorker(ExecutionWorker&&) = delete;
-        ExecutionWorker& operator=(ExecutionWorker&&) = delete;
-
-        void start();
-
-        void stop() noexcept;
+        void run() const;
 
     private:
-        void run() const;
 
         concurrency::Queue<OrderRequest>& orderQueue;
         OrderManager& orderManager;
-
-        std::jthread worker;
-        bool running { false };
     };
 }
 

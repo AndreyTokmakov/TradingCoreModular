@@ -20,27 +20,6 @@ namespace trading::strategy
     {
     }
 
-    StrategyWorker::~StrategyWorker() {
-        stop();
-    }
-
-    void StrategyWorker::start()
-    {
-        if (running)
-            return;
-        running = true;
-        worker = std::jthread { &StrategyWorker::run, this };
-    }
-
-    void StrategyWorker::stop() noexcept
-    {
-        if (!running)
-            return;
-        marketEventQueue.close();
-        if (worker.joinable())
-            worker.join();
-        running = false;
-    }
 
     void StrategyWorker::run() const
     {

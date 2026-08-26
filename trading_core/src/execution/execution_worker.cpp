@@ -18,30 +18,6 @@ namespace trading::execution
     {
     }
 
-    ExecutionWorker::~ExecutionWorker()
-    {
-        stop();
-    }
-
-    void ExecutionWorker::start()
-    {
-        if (running)
-            return;
-
-        running = true;
-        worker = std::jthread { &ExecutionWorker::run, this };
-    }
-
-    void ExecutionWorker::stop() noexcept
-    {
-        if (!running)
-            return;
-        orderQueue.close();
-        if (worker.joinable())
-            worker.join();
-        running = false;
-    }
-
     void ExecutionWorker::run() const
     {
         OrderRequest request {};

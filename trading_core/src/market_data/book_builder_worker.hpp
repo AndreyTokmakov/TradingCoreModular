@@ -13,37 +13,22 @@ Description : Processes market-data book updates on the BookBuilder thread.
 #include "book_builder.hpp"
 #include "market_data_parser.hpp"
 #include "queue.hpp"
-
-#include <thread>
-
+#include <worker.hpp>
 
 namespace trading::market_data
 {
-    class BookBuilderWorker final
+    class BookBuilderWorker final: public common::Worker<BookBuilderWorker>
     {
     public:
         BookBuilderWorker(BookBuilder& bookBuilder,
                           concurrency::Queue<BookUpdates>& queue);
 
-        ~BookBuilderWorker();
-
-        BookBuilderWorker(const BookBuilderWorker&) = delete;
-        BookBuilderWorker& operator=(const BookBuilderWorker&) = delete;
-
-        BookBuilderWorker(BookBuilderWorker&&) = delete;
-        BookBuilderWorker& operator=(BookBuilderWorker&&) = delete;
-
-        void start();
-
-        void stop() noexcept;
+        void run() const;
 
     private:
-        void run() const;
 
         BookBuilder& bookBuilder;
         concurrency::Queue<BookUpdates>& queue;
-        std::jthread worker;
-        bool running { false };
     };
 }
 

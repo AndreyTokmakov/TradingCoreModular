@@ -12,40 +12,26 @@ Description : Executes strategy processing on the strategy thread.
 
 #include "model/market_event.hpp"
 #include "queue.hpp"
+#include "worker.hpp"
 #include "strategy.hpp"
 #include "strategy_executor.hpp"
 
-#include <thread>
 
 namespace trading::strategy
 {
-    class StrategyWorker final
+    class StrategyWorker final: public common::Worker<StrategyWorker>
     {
     public:
         StrategyWorker(concurrency::Queue<market_data::MarketEvent>& marketEventQueue,
-                          IStrategy& strategy,
-                          StrategyExecutor& executor) noexcept;
+                       IStrategy& strategy,
+                       StrategyExecutor& executor) noexcept;
 
-        ~StrategyWorker();
-
-        StrategyWorker(const StrategyWorker&) = delete;
-        StrategyWorker& operator=(const StrategyWorker&) = delete;
-
-        StrategyWorker(StrategyWorker&&) = delete;
-        StrategyWorker& operator=(StrategyWorker&&) = delete;
-
-        void start();
-        void stop() noexcept;
-
-    private:
         void run() const;
 
+    private:
         concurrency::Queue<market_data::MarketEvent>& marketEventQueue;
         IStrategy& strategy;
         StrategyExecutor& executor;
-
-        std::jthread worker;
-        bool running { false };
     };
 }
 

@@ -81,6 +81,7 @@ add_executable(${PROJECT_NAME}
         ${COMMON}/queue.hpp
         ${COMMON}/condition_variable_queue.hpp
         ${COMMON}/ring_buffer.hpp
+        ${COMMON}/worker.hpp
 
         ${CONFIG}/config.hpp
         ${CONFIG}/json_config_loader.hpp

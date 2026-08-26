@@ -11,35 +11,11 @@ Description : Records market events on the recording thread.
 
 namespace trading::recording
 {
-    RecordingWorker::RecordingWorker(
-        IRecorder& recorder,
-        concurrency::Queue<market_data::MarketEvent>& queue):
+    RecordingWorker::RecordingWorker(IRecorder& recorder,
+                                     concurrency::Queue<market_data::MarketEvent>& queue):
         recorder { recorder },
         queue { queue }
     {
-    }
-
-    RecordingWorker::~RecordingWorker()
-    {
-        stop();
-    }
-
-    void RecordingWorker::start()
-    {
-        if (running)
-            return;
-        running = true;
-        worker = std::jthread { &RecordingWorker::run, this };
-    }
-
-    void RecordingWorker::stop() noexcept
-    {
-        if (!running)
-            return;
-        queue.close();
-        if (worker.joinable())
-            worker.join();
-        running = false;
     }
 
     void RecordingWorker::run() const
