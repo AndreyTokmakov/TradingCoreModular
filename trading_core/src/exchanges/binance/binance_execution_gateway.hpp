@@ -13,6 +13,7 @@ Description : Binance implementation of the execution gateway.
 #include "execution_gateway.hpp"
 
 #include <functional>
+#include <string>
 
 /**
  * Binance implementation of IExecutionGateway.
