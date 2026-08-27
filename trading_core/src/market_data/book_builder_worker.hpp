@@ -11,9 +11,10 @@ Description : Processes market-data book updates on the BookBuilder thread.
 #define FINANCETECHNOLOGYPROJECTS_BOOK_BUILDER_WORKER_HPP
 
 #include "book_builder.hpp"
-#include "market_data_parser.hpp"
+#include "interfaces/market_data_parser.hpp"
+#include "interfaces/snapshot_provider.hpp"
 #include "queue.hpp"
-#include <worker.hpp>
+#include "worker.hpp"
 
 namespace trading::market_data
 {
@@ -21,6 +22,7 @@ namespace trading::market_data
     {
     public:
         BookBuilderWorker(BookBuilder& bookBuilder,
+                          ISnapshotProvider& snapshotProvider,
                           concurrency::Queue<BookUpdates>& queue);
 
         void run() const;
@@ -28,6 +30,7 @@ namespace trading::market_data
     private:
 
         BookBuilder& bookBuilder;
+        ISnapshotProvider& snapshotProvider;
         concurrency::Queue<BookUpdates>& queue;
     };
 }

@@ -116,8 +116,11 @@ Application::Application(const std::filesystem::path& configPath):
         bookBuilder {
             config.instrument, orderBook, marketEventDispatcher  // CPU-1: BookBuilder        --> OrderBook::onBookUpdate()
         },                                                             //                           --> MarketEventDispatcher::onMarketEvent()
+        binanceSnapshotProvider {
+            findExchange(config, "binance").marketDataEndpoint
+        },
         bookBuilderWorker {
-            bookBuilder, bookUpdateQueue                         // CPU-1: bookUpdateQueue    --> BookBuilderWorker --> BookBuilder
+            bookBuilder, binanceSnapshotProvider, bookUpdateQueue  // CPU-1: bookUpdateQueue    --> BookBuilderWorker --> BookBuilder
         },
         recordingWorker {                                              // CPU-4:
             recorder, recordingEventQueue

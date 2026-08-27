@@ -11,11 +11,6 @@ Description : Order book state management.
 
 namespace trading::market_data
 {
-    bool OrderBook::isValid() const noexcept
-    {
-        return valid;
-    }
-
     SequenceNumber OrderBook::sequence() const noexcept
     {
         return sequenceNumber;
@@ -26,7 +21,6 @@ namespace trading::market_data
         bids.clear();
         asks.clear();
         sequenceNumber = 0;
-        valid = false;
     }
 
     // TODO: Rename --- Snapshot
@@ -37,17 +31,11 @@ namespace trading::market_data
         bids = snapBids;
         asks = snapAsks;
         sequenceNumber = sequence;
-        valid = true;
     }
 
     bool OrderBook::applyUpdate(const BookUpdate& update) noexcept
     {
-        if (!valid)
-            return false;
-
-        if (update.sequence != sequenceNumber + 1)
-        {
-            valid = false;
+        if (update.sequence != sequenceNumber + 1){
             return false;
         }
 

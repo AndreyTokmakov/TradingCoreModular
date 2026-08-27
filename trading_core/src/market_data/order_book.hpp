@@ -29,9 +29,6 @@ namespace trading::market_data
         using Levels = OrderBookLevels;
 
         [[nodiscard]]
-        bool isValid() const noexcept;
-
-        [[nodiscard]]
         SequenceNumber sequence() const noexcept;
 
         void clear() noexcept;
@@ -59,7 +56,6 @@ namespace trading::market_data
         Levels bids;
         Levels asks;
         SequenceNumber sequenceNumber { 0 };
-        bool valid { false };
     };
 }
 

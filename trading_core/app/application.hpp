@@ -63,6 +63,7 @@ Description : application.hpp
 #include "binance_execution_report_source.hpp"
 #include "binance_market_data_parser.hpp"
 #include "binance_market_data_source.hpp"
+#include "binance_snapshot_provider.hpp"
 
 #include "book_builder.hpp"
 #include "book_builder_worker.hpp"
@@ -130,8 +131,8 @@ namespace trading::app
 
         market_data::MarketEventDispatcher marketEventDispatcher;
         market_data::BookBuilder bookBuilder;
+        exchanges::binance::BinanceSnapshotProvider binanceSnapshotProvider;
         market_data::BookBuilderWorker bookBuilderWorker;
-
 
         recording::RecordingWorker recordingWorker;
 

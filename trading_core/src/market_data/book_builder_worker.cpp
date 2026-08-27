@@ -12,14 +12,20 @@ Description : Processes market-data book updates on the BookBuilder thread.
 namespace trading::market_data
 {
     BookBuilderWorker::BookBuilderWorker(BookBuilder& bookBuilder,
+                                         ISnapshotProvider& snapshotProvider,
                                          concurrency::Queue<BookUpdates>& queue):
         bookBuilder { bookBuilder },
+        snapshotProvider { snapshotProvider },
         queue { queue }
     {
     }
 
     void BookBuilderWorker::run() const
     {
+        const Snapshot snapshot = snapshotProvider.getSnapshot();
+        if (!bookBuilder.applySnapshot(snapshot))
+            return;
+
         BookUpdates updates;
         while (queue.waitPop(updates))
         {

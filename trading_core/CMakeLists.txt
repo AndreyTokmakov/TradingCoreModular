@@ -102,6 +102,7 @@ add_executable(${PROJECT_NAME}
         ${MARKET_DATA}/interfaces/market_data_parser.hpp
         ${MARKET_DATA}/interfaces/market_data_source.hpp
         ${MARKET_DATA}/interfaces/book_update_handler.hpp
+        ${MARKET_DATA}/interfaces/snapshot_provider.hpp
 
         ${MARKET_DATA}/market_data_message_handler.cpp
         ${MARKET_DATA}/market_data_message_handler.hpp
@@ -142,6 +143,8 @@ add_executable(${PROJECT_NAME}
         ${BINANCE}/binance_execution_gateway.cpp
         ${BINANCE}/binance_execution_report_source.hpp
         ${BINANCE}/binance_execution_report_source.cpp
+        ${BINANCE}/binance_snapshot_provider.hpp
+        ${BINANCE}/binance_snapshot_provider.cpp
 
         ${POSITION}/position.hpp
         ${POSITION}/position.cpp

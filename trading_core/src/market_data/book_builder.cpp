@@ -57,7 +57,9 @@ namespace trading::market_data
             return false;
 
         orderBook.replace(snapshot.sequence, snapshot.bids, snapshot.asks);
-        return orderBook.isValid();
+
+
+        return true;
     }
 
     void BookBuilder::onBookUpdate(const BookUpdate& update)
