@@ -26,11 +26,9 @@ FetchContent_Declare(boost
 FetchContent_MakeAvailable(boost)
 #]]
 
-set(THIRD_PARTY_DIR /home/andtokm/DiskS/ProjectsUbuntu/third_party)
 
 # Nlohmann JSON
 include_directories(${THIRD_PARTY_DIR}/json/include)
-
 # SPD Log
 include_directories(${THIRD_PARTY_DIR}/spdlog/include)
 

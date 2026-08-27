@@ -25,11 +25,12 @@ namespace trading::concurrency
     public:
         void push(T value) override
         {
-            std::lock_guard lock { mutex };
-            if (closed)
-                return;
-            values.push_back(std::move(value));
-            lock.~lock_guard();
+            {
+                std::lock_guard lock { mutex };
+                if (closed)
+                    return;
+                values.push_back(std::move(value));
+            }
             condition.notify_one();
         }
 
@@ -52,9 +53,10 @@ namespace trading::concurrency
 
         void close() noexcept override
         {
-            std::lock_guard lock { mutex };
-            closed = true;
-            lock.~lock_guard();
+            {
+                std::lock_guard lock { mutex };
+                closed = true;
+            }
             condition.notify_all();
         }
 
