@@ -201,6 +201,13 @@ add_executable(${PROJECT_NAME}
         ${TESTS}/test_support/trading_test_environment.hpp
         ${TESTS}/test_support/trading_test_environment.cpp
         #]]
+
+        ${TESTS}/e2e/e2eTests.cpp
+        ${TESTS}/e2e/stubs/test_execution_gateway.cpp
+        ${TESTS}/e2e/stubs/test_execution_report_source.cpp
+        ${TESTS}/e2e/stubs/test_market_data_source.cpp
+        ${TESTS}/e2e/stubs/test_snapshot_provider.cpp
+        ${TESTS}/e2e/stubs/test_market_data_parser.cpp
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC "${CMAKE_SOURCE_DIR}/Utilities")

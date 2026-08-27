@@ -32,6 +32,7 @@ void json_config_loader_test();
 
 void trading_integration_test();
 void trading_inbound_integration_test();
+void e2eTests();
 
 // TODO:
 //   Metrics
@@ -111,6 +112,8 @@ int main([[maybe_unused]] const int argc,
     // runApp(parameters);
     // runTests(parameters);
     // runIntegrationTests(parameters);
+
+    e2eTests();
 
     return EXIT_SUCCESS;
 }
