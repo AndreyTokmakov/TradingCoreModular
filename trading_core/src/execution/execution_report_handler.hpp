@@ -127,7 +127,7 @@ Description : execution_report_handler.hpp
 
 namespace trading::execution
 {
-    class ExecutionReportHandler final : public IExecutionReportHandler
+    class ExecutionReportHandler final
     {
     public:
         ExecutionReportHandler(OrderManager& orderManager,
@@ -135,7 +135,7 @@ namespace trading::execution
                                recording::IRecorder& recorder) noexcept;
 
         [[nodiscard]]
-        bool onExecutionReport(const ExecutionReport& report) override;
+        bool onExecutionReport(const ExecutionReport& report);
 
     private:
         OrderManager& orderManager;

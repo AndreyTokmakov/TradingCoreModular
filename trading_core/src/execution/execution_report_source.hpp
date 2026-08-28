@@ -55,20 +55,12 @@ Description : Execution report source interface.
 
 namespace trading::execution
 {
-    struct IExecutionReportHandler
-    {
-        virtual ~IExecutionReportHandler() = default;
-        virtual bool onExecutionReport(const ExecutionReport& report) = 0;
-    };
-
     struct IExecutionReportSource
     {
         virtual ~IExecutionReportSource() = default;
 
         virtual void start() = 0;
         virtual void stop() = 0;
-
-        virtual void setExecutionReportHandler(IExecutionReportHandler& handler) = 0;
     };
 }
 

@@ -12,9 +12,11 @@ Description : Sends orders to the exchange on the execution thread.
 namespace trading::execution
 {
     ExecutionWorker::ExecutionWorker(concurrency::Queue<ExecutionWorkItem>& executionQueue,
-                                     OrderManager& orderManager):
+                                    OrderManager& orderManager,
+                                    ExecutionReportHandler& executionReportHandler) noexcept :
         executionQueue { executionQueue },
-        orderManager { orderManager }
+        orderManager { orderManager },
+        executionReportHandler { executionReportHandler }
     {
     }
 
@@ -23,11 +25,25 @@ namespace trading::execution
         ExecutionWorkItem workItem;
         while (executionQueue.waitPop(workItem))
         {
-            if (const OrderRequest* request = std::get_if<OrderRequest>(&workItem))
-            {
-                // FIXME
-                const auto _  = orderManager.createOrder(*request);
-            }
+            std::visit([this](const auto& item) {
+                process(item);
+            },workItem);
         }
+    }
+
+    void ExecutionWorker::process(const OrderRequest& request) const
+    {
+        [[maybe_unused]]
+        const OrderCreationResult result = orderManager.createOrder(request);
+
+        // TODO: Handle order creation errors: logging / metrics / risk event.
+    }
+
+    void ExecutionWorker::process(const ExecutionReport& report) const
+    {
+        [[maybe_unused]]
+        const bool processed = executionReportHandler.onExecutionReport(report);
+
+        // TODO: Handle unknown orders or invalid execution reports.
     }
 }

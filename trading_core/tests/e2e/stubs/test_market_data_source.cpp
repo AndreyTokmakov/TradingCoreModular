@@ -20,7 +20,12 @@ namespace trading::testing::stubs
 
     void TestMarketDataSource::start()
     {
+        std::cout << __PRETTY_FUNCTION__ << "[" << __LINE__ << "] Connecting to '" << endpoint  << "' . . . ." << std::endl;
+
         running = true;
+        std::cout << __PRETTY_FUNCTION__ << "[" << __LINE__ << "] " << std::endl;
+
+        messageHandler->onMessage("1,1000001,1640995200000,Buy,98765,100,1000");
 
         // TODO: Connect to endpoint.
         // TODO: Start receiving market data.

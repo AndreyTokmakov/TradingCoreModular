@@ -96,7 +96,7 @@ Application::Application(const std::filesystem::path& configPath):
             riskManager, positionManager, binanceExecutionGateway
         },
         executionWorker {                                             // CPU-3: executionQueue --> ExecutionWorker --> OrderManager::createOrder()
-            executionQueue, orderManager
+            executionQueue, orderManager, executionReportHandler
         },
         strategyExecutor {
             executionQueue, config.strategy.orderQuantity          // CPU-2: StrategyExecutor   --> executionQueue::push()
@@ -108,7 +108,7 @@ Application::Application(const std::filesystem::path& configPath):
             orderManager, positionManager, recorder          // FIXME: Запускать на отдельном CPU --> пихать в executionQueue ExecutionReport event-ы
         },
         executionReportSource {
-            findExchange(config, "binance").executionEndpoint
+            findExchange(config, "binance").executionEndpoint, executionQueue
         },
         marketEventDispatcher {                                        // CPU-1: MarketEventDispatcher   -->   strategyEventQueue::push()
             strategyEventQueue, recordingEventQueue              //                                -->   recordingEventQueue::push()
@@ -135,19 +135,13 @@ Application::Application(const std::filesystem::path& configPath):
     {
         configureMarketData();
     }
-    Application::~Application()
-    {
+
+    Application::~Application() {
         stop();
     }
 
-    void Application::configureMarketData()
-    {
+    void Application::configureMarketData() {
         marketDataSource.setMessageHandler(marketDataMessageHandler);
-    }
-
-    void Application::configureExecutionReports()
-    {
-        executionReportSource.setExecutionReportHandler(executionReportHandler);
     }
 
     void Application::start()

@@ -443,6 +443,7 @@ namespace testing_utils
 
     void test_assert_null()
     {
+        [[maybe_unused]]
         int *ptr = new int(1);
         // AssertNotNull(ptr);
         // AssertNotNull(ptr, "Shall not be null");

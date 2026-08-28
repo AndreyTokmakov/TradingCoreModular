@@ -14,13 +14,17 @@ Description : Test execution report source.
 #include <string>
 
 #include "execution_report_source.hpp"
+#include "execution_work_item.hpp"
+#include "queue.hpp"
+
 
 namespace trading::testing::stubs
 {
     class TestExecutionReportSource final: public execution::IExecutionReportSource
     {
     public:
-        explicit TestExecutionReportSource(std::string endpoint) noexcept;
+        explicit TestExecutionReportSource(std::string endpoint,
+                                           concurrency::Queue<execution::ExecutionWorkItem>& executionQueue) noexcept;
 
         TestExecutionReportSource(const TestExecutionReportSource&) = delete;
         TestExecutionReportSource& operator=(const TestExecutionReportSource&) = delete;
@@ -31,13 +35,11 @@ namespace trading::testing::stubs
         void start() override;
         void stop() override;
 
-        void setExecutionReportHandler(execution::IExecutionReportHandler& handler) override;
-
         void emit(const execution::ExecutionReport& report) const;
 
     private:
         std::string endpoint;
-        execution::IExecutionReportHandler* reportHandler { nullptr };
+        concurrency::Queue<execution::ExecutionWorkItem>& executionQueue;
         bool running { false };
     };
 }

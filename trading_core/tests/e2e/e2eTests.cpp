@@ -38,6 +38,11 @@ Description : order_manager_test.cpp
 
 namespace
 {
+    using trading::Price;
+    using trading::Quantity;
+    using trading::Timestamp;
+    using trading::SequenceNumber;
+
     namespace market_data = trading::market_data;
     namespace concurrency = trading::concurrency;
     namespace execution = trading::execution;
@@ -71,8 +76,8 @@ namespace
     private:
 
         void configureMarketData();
-        void configureExecutionReports();
 
+        market_data::Snapshot getSnapshot();
 
         concurrency::ConditionVariableQueue<market_data::BookUpdates> bookUpdateQueue;
         concurrency::ConditionVariableQueue<market_data::MarketEvent> strategyEventQueue;
@@ -155,7 +160,7 @@ namespace
         riskManager, positionManager, testExecutionGateway
     },
     executionWorker {                                             // CPU-3: executionOrderQueue --> ExecutionWorker --> OrderManager::createOrder()
-        executionOrderQueue, orderManager
+        executionOrderQueue, orderManager, executionReportHandler
     },
     strategyExecutor {
         executionOrderQueue, config.strategy.orderQuantity     // CPU-2: StrategyExecutor   --> executionOrderQueue::push()
@@ -167,7 +172,7 @@ namespace
         orderManager, positionManager, recorder
     },
     testExecutionReportSource {
-        findExchange(config, "binance").executionEndpoint
+        findExchange(config, "binance").executionEndpoint, executionOrderQueue
     },
     marketEventDispatcher {                                        // CPU-1: MarketEventDispatcher   -->   strategyEventQueue::push()
         strategyEventQueue, recordingEventQueue              //                                -->   recordingEventQueue::push()
@@ -176,7 +181,7 @@ namespace
         config.instrument, orderBook, marketEventDispatcher  // CPU-1: BookBuilder        --> OrderBook::onBookUpdate()
     },                                                             //                           --> MarketEventDispatcher::onMarketEvent()
     testSnapshotProvider {
-        findExchange(config, "binance").marketDataEndpoint
+        findExchange(config, "binance").marketDataEndpoint,  [this]{ return getSnapshot(); }
     },
     bookBuilderWorker {
         bookBuilder, testSnapshotProvider, bookUpdateQueue  // CPU-1: bookUpdateQueue    --> BookBuilderWorker --> BookBuilder
@@ -205,11 +210,6 @@ namespace
         testMarketDataSource.setMessageHandler(marketDataMessageHandler);
     }
 
-    void TestApplication::configureExecutionReports()
-    {
-        testExecutionReportSource.setExecutionReportHandler(executionReportHandler);
-    }
-
     void TestApplication::start()
     {
         //const auto logger = logging::LoggerFactory::createLogger({}, {});
@@ -218,9 +218,13 @@ namespace
 
         running = true;
 
-        // testMarketDataSource.start();    // CPU-0
         bookBuilderWorker.start();       // CPU-1
-        // strategyWorker.start();
+        strategyWorker.start();
+
+        std::this_thread::sleep_for(std::chrono::seconds { 1 });
+
+        testMarketDataSource.start();    // CPU-0
+
         // executionWorker.start();
         // recordingWorker.start();
         // testExecutionReportSource.start();
@@ -238,6 +242,27 @@ namespace
         bookBuilderWorker.stop();
         testMarketDataSource.stop();
         running = false;
+    }
+
+    market_data::Snapshot TestApplication::getSnapshot()
+    {
+        std::cout << __PRETTY_FUNCTION__ << "[" << __LINE__ << "] " << std::endl;
+        constexpr Timestamp exchangeTimestamp { 1'000'000 };
+
+        return market_data::Snapshot {
+            .instrument = 1,
+            .sequence = SequenceNumber { 1'000'000 },
+            .exchangeTimestamp = exchangeTimestamp,
+            .bids = {
+                    { Price { 6'500'000'000'000 }, Quantity { 120'000'000 } },
+                    { Price { 6'499'999'000'000 }, Quantity { 250'000'000 } }
+            },
+            .asks = {
+                    { Price { 6'500'001'000'000 }, Quantity { 90'000'000 } },
+                    { Price { 6'500'002'000'000 }, Quantity { 310'000'000 } }
+            }
+        };
+
     }
 }
 

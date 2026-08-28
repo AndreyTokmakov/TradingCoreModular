@@ -51,6 +51,7 @@ namespace trading::market_data
         bookUpdates.clear();
         if (parser.parse(message, bookUpdates) != ParseResult::Success)
             return;
+
         if (!bookUpdates.empty())
             bookUpdateQueue.push(std::move(bookUpdates));
     }

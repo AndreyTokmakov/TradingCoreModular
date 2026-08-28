@@ -11,8 +11,11 @@ Description : Test execution report source implementation.
 
 namespace trading::testing::stubs
 {
-    TestExecutionReportSource::TestExecutionReportSource(std::string endpoint) noexcept :
-        endpoint { std::move(endpoint) } {
+    TestExecutionReportSource::TestExecutionReportSource(std::string endpoint,
+                                                         concurrency::Queue<execution::ExecutionWorkItem>& executionQueue) noexcept :
+        endpoint { std::move(endpoint) },
+        executionQueue { executionQueue }
+    {
     }
 
     void TestExecutionReportSource::start()
@@ -39,16 +42,10 @@ namespace trading::testing::stubs
         running = false;
     }
 
-    void TestExecutionReportSource::setExecutionReportHandler(execution::IExecutionReportHandler& handler)
-    {
-        reportHandler = &handler;
-    }
-
     void TestExecutionReportSource::emit(const execution::ExecutionReport& report) const
     {
-        if (!running || reportHandler == nullptr)
+        if (!running)
             return;
-
-        reportHandler->onExecutionReport(report);
+        executionQueue.push(report);
     }
 }

@@ -102,8 +102,6 @@ namespace trading::app
     private:
 
         void configureMarketData();
-        void configureExecutionReports();
-
 
         concurrency::ConditionVariableQueue<market_data::BookUpdates> bookUpdateQueue;
         concurrency::ConditionVariableQueue<market_data::MarketEvent> strategyEventQueue;

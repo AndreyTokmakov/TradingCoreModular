@@ -58,7 +58,6 @@ namespace trading::market_data
 
         orderBook.replace(snapshot.sequence, snapshot.bids, snapshot.asks);
 
-
         return true;
     }
 

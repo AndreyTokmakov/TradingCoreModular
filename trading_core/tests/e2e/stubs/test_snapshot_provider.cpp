@@ -33,11 +33,11 @@ namespace trading::testing::stubs
 
     market_data::Snapshot TestSnapshotProvider::getSnapshot()
     {
-        std::cout << __FUNCTION__  << ":" << __LINE__ << std::endl;
+        std::cout << __PRETTY_FUNCTION__ << " [" << __LINE__ << "] " << std::endl;
         if (!fetchHandler)
             return {};
 
-        std::cout << __FUNCTION__  << ":" << __LINE__ << std::endl;
+        std::cout << __PRETTY_FUNCTION__ << " [" << __LINE__ << "] " << std::endl;
         return fetchHandler();
     }
 }
