@@ -129,8 +129,6 @@ add_executable(${PROJECT_NAME}
         ${EXECUTION}/order_manager.hpp
         ${EXECUTION}/order_manager.cpp
         ${EXECUTION}/execution_report_source.hpp
-        ${EXECUTION}/execution_report_handler.cpp
-        ${EXECUTION}/execution_report_handler.hpp
         ${EXECUTION}/execution_worker.cpp
         ${EXECUTION}/execution_worker.hpp
         ${EXECUTION}/execution_work_item.hpp

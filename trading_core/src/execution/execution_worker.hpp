@@ -10,7 +10,7 @@ Description : Sends orders to the exchange on the execution thread.
 #ifndef FINANCETECHNOLOGYPROJECTS_EXECUTION_WORKER_HPP
 #define FINANCETECHNOLOGYPROJECTS_EXECUTION_WORKER_HPP
 
-#include "execution_report_handler.hpp"
+#include "recorder.hpp"
 #include "execution_work_item.hpp"
 #include "order_manager.hpp"
 #include "queue.hpp"
@@ -23,7 +23,7 @@ namespace trading::execution
     public:
         ExecutionWorker(concurrency::Queue<ExecutionWorkItem>& executionQueue,
                         OrderManager& orderManager,
-                        ExecutionReportHandler& executionReportHandler) noexcept;
+                        recording::IRecorder& recorder) noexcept;
 
         void run() const;
 
@@ -34,7 +34,7 @@ namespace trading::execution
 
         concurrency::Queue<ExecutionWorkItem>& executionQueue;
         OrderManager& orderManager;
-        ExecutionReportHandler& executionReportHandler;
+        recording::IRecorder& recorder;
     };
 }
 

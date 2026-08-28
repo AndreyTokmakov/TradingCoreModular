@@ -93,15 +93,27 @@ namespace trading::execution
 
     bool OrderManager::applyExecution(const ExecutionReport& report)
     {
-        const auto it = orders.find(report.clientOrderId);
-        if (it == orders.end())
+        const auto itOrder = orders.find(report.clientOrderId);
+        if (itOrder == orders.end())
             return false;
 
-        Order& order = it->second;
+        Order& order = itOrder->second;
 
         order.exchangeOrderId = report.exchangeOrderId;
         order.status = report.status;
         order.filledQuantity = report.filledQuantity;
+
+        if (report.execType == ExecType::Trade && !positionManager.applyExecution(report))
+            return false;
+
+        // Если positionManager.applyExecution(report) вернёт false, OrderManager уже частично изменил Order но наружу вернётся
+        // То есть false здесь уже означает не «ничего не обработано», а «обработка была частично выполнена».
+        // Это не обязательно ошибка, но семантику bool стоит определить явно.
+        // Заменить bool на  enum class ExecutionResult {
+        //                            Success,
+        //                            UnknownOrder,
+        //                            PositionUpdateFailed
+        //                    };
 
         return true;
     }
@@ -111,7 +123,6 @@ namespace trading::execution
         const auto it = orders.find(orderId);
         if (it == orders.end())
             return nullptr;
-
         return &it->second;
     }
 
@@ -120,7 +131,6 @@ namespace trading::execution
         if (const auto it = orders.find(orderId); it == orders.end())
             return false;
         gateway.cancel(orderId);
-
         return true;
     }
 }

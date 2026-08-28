@@ -96,16 +96,13 @@ Application::Application(const std::filesystem::path& configPath):
             riskManager, positionManager, binanceExecutionGateway
         },
         executionWorker {                                             // CPU-3: executionQueue --> ExecutionWorker --> OrderManager::createOrder()
-            executionQueue, orderManager, executionReportHandler
+            executionQueue, orderManager, recorder
         },
         strategyExecutor {
             executionQueue, config.strategy.orderQuantity          // CPU-2: StrategyExecutor   --> executionQueue::push()
         },
         strategyWorker {                                              // CPU-2: strategyEventQueue --> StrategyProcessor -> ImbalanceStrategy::evaluate()
             strategyEventQueue, strategy, strategyExecutor   //                                                 -> StrategyExecutor::execute()
-        },
-        executionReportHandler {
-            orderManager, positionManager, recorder          // FIXME: Запускать на отдельном CPU --> пихать в executionQueue ExecutionReport event-ы
         },
         executionReportSource {
             findExchange(config, "binance").executionEndpoint, executionQueue

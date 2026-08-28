@@ -13,7 +13,6 @@ Description : order_manager_test.cpp
 #include "book_builder.hpp"
 #include "book_builder_worker.hpp"
 #include "condition_variable_queue.hpp"
-#include "execution_report_handler.hpp"
 #include "execution_worker.hpp"
 #include "imbalance_strategy.hpp"
 #include "market_data_message_handler.hpp"
@@ -99,7 +98,6 @@ namespace
         strategy::StrategyExecutor strategyExecutor;
         strategy::StrategyWorker strategyWorker;
 
-        execution::ExecutionReportHandler executionReportHandler;
         testing::stubs::TestExecutionReportSource testExecutionReportSource;
 
         market_data::MarketEventDispatcher marketEventDispatcher;
@@ -150,55 +148,52 @@ namespace
             positionManager {},
             riskManager { config.riskLimits },
             strategy {
-        config.strategy.thresholdNumerator,
-        config.strategy.thresholdDenominator
-    },
-    testExecutionGateway {
-        findExchange(config, "binance").executionEndpoint
-    },
-    orderManager {                                                 // CPU-3:  OrderManager --> gateway.send() / cancel()
-        riskManager, positionManager, testExecutionGateway
-    },
-    executionWorker {                                             // CPU-3: executionOrderQueue --> ExecutionWorker --> OrderManager::createOrder()
-        executionOrderQueue, orderManager, executionReportHandler
-    },
-    strategyExecutor {
-        executionOrderQueue, config.strategy.orderQuantity     // CPU-2: StrategyExecutor   --> executionOrderQueue::push()
-    },
-    strategyWorker {                                              // CPU-2: strategyEventQueue --> StrategyProcessor -> ImbalanceStrategy::evaluate()
-        strategyEventQueue, strategy, strategyExecutor   //                                                 -> StrategyExecutor::execute()
-    },
-    executionReportHandler {
-        orderManager, positionManager, recorder
-    },
-    testExecutionReportSource {
-        findExchange(config, "binance").executionEndpoint, executionOrderQueue
-    },
-    marketEventDispatcher {                                        // CPU-1: MarketEventDispatcher   -->   strategyEventQueue::push()
-        strategyEventQueue, recordingEventQueue              //                                -->   recordingEventQueue::push()
-    },
-    bookBuilder {
-        config.instrument, orderBook, marketEventDispatcher  // CPU-1: BookBuilder        --> OrderBook::onBookUpdate()
-    },                                                             //                           --> MarketEventDispatcher::onMarketEvent()
-    testSnapshotProvider {
-        findExchange(config, "binance").marketDataEndpoint,  [this]{ return getSnapshot(); }
-    },
-    bookBuilderWorker {
-        bookBuilder, testSnapshotProvider, bookUpdateQueue  // CPU-1: bookUpdateQueue    --> BookBuilderWorker --> BookBuilder
-    },
-    recordingWorker {                                              // CPU-4:
-        recorder, recordingEventQueue
-    },
-    testMarketDataParser {},                                           // CPU-0:  MarketDataMessageHandler  --> BinanceMarketDataParser -- > bookUpdateQueue.push();
-    marketDataMessageHandler {                                     // CPU-0:  MarketDataSource --> MarketDataMessageHandler
-        testMarketDataParser, bookUpdateQueue
-    },
-    testMarketDataSource {                                             // CPU-0:  Exchange --> MarketDataSource
-        findExchange(config, "binance").marketDataEndpoint
-    }
-    {
-        configureMarketData();
-    }
+                config.strategy.thresholdNumerator,
+                config.strategy.thresholdDenominator
+            },
+            testExecutionGateway {
+                findExchange(config, "binance").executionEndpoint
+            },
+            orderManager {                                                 // CPU-3:  OrderManager --> gateway.send() / cancel()
+                riskManager, positionManager, testExecutionGateway
+            },
+            executionWorker {                                             // CPU-3: executionOrderQueue --> ExecutionWorker --> OrderManager::createOrder()
+                executionOrderQueue, orderManager, recorder
+            },
+            strategyExecutor {
+                executionOrderQueue, config.strategy.orderQuantity     // CPU-2: StrategyExecutor   --> executionOrderQueue::push()
+            },
+            strategyWorker {                                              // CPU-2: strategyEventQueue --> StrategyProcessor -> ImbalanceStrategy::evaluate()
+                strategyEventQueue, strategy, strategyExecutor   //                                                 -> StrategyExecutor::execute()
+            },
+            testExecutionReportSource {
+                findExchange(config, "binance").executionEndpoint, executionOrderQueue
+            },
+            marketEventDispatcher {                                        // CPU-1: MarketEventDispatcher   -->   strategyEventQueue::push()
+                strategyEventQueue, recordingEventQueue              //                                -->   recordingEventQueue::push()
+            },
+            bookBuilder {
+                config.instrument, orderBook, marketEventDispatcher  // CPU-1: BookBuilder        --> OrderBook::onBookUpdate()
+            },                                                             //                           --> MarketEventDispatcher::onMarketEvent()
+            testSnapshotProvider {
+                findExchange(config, "binance").marketDataEndpoint,  [this]{ return getSnapshot(); }
+            },
+            bookBuilderWorker {
+                bookBuilder, testSnapshotProvider, bookUpdateQueue  // CPU-1: bookUpdateQueue    --> BookBuilderWorker --> BookBuilder
+            },
+            recordingWorker {                                              // CPU-4:
+                recorder, recordingEventQueue
+            },
+            testMarketDataParser {},                                           // CPU-0:  MarketDataMessageHandler  --> BinanceMarketDataParser -- > bookUpdateQueue.push();
+            marketDataMessageHandler {                                     // CPU-0:  MarketDataSource --> MarketDataMessageHandler
+                testMarketDataParser, bookUpdateQueue
+            },
+            testMarketDataSource {                                             // CPU-0:  Exchange --> MarketDataSource
+                findExchange(config, "binance").marketDataEndpoint
+            }
+        {
+            configureMarketData();
+        }
 
     TestApplication::~TestApplication()
     {
@@ -254,15 +249,14 @@ namespace
             .sequence = SequenceNumber { 1'000'000 },
             .exchangeTimestamp = exchangeTimestamp,
             .bids = {
-                    { Price { 6'500'000'000'000 }, Quantity { 120'000'000 } },
-                    { Price { 6'499'999'000'000 }, Quantity { 250'000'000 } }
+                            { Price { 6'500'000'000'000 }, Quantity { 120'000'000 } },
+                            { Price { 6'499'999'000'000 }, Quantity { 250'000'000 } }
             },
             .asks = {
-                    { Price { 6'500'001'000'000 }, Quantity { 90'000'000 } },
-                    { Price { 6'500'002'000'000 }, Quantity { 310'000'000 } }
+                            { Price { 6'500'001'000'000 }, Quantity { 90'000'000 } },
+                            { Price { 6'500'002'000'000 }, Quantity { 310'000'000 } }
             }
         };
-
     }
 }
 

@@ -68,7 +68,6 @@ Description : application.hpp
 #include "book_builder.hpp"
 #include "book_builder_worker.hpp"
 #include "condition_variable_queue.hpp"
-#include "execution_report_handler.hpp"
 #include "execution_worker.hpp"
 #include "imbalance_strategy.hpp"
 #include "market_data_message_handler.hpp"
@@ -123,7 +122,6 @@ namespace trading::app
         strategy::StrategyExecutor strategyExecutor;
         strategy::StrategyWorker strategyWorker;
 
-        execution::ExecutionReportHandler executionReportHandler;
         exchanges::binance::BinanceExecutionReportSource executionReportSource;
 
         market_data::MarketEventDispatcher marketEventDispatcher;

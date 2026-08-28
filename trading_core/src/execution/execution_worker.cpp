@@ -13,10 +13,10 @@ namespace trading::execution
 {
     ExecutionWorker::ExecutionWorker(concurrency::Queue<ExecutionWorkItem>& executionQueue,
                                     OrderManager& orderManager,
-                                    ExecutionReportHandler& executionReportHandler) noexcept :
+                                    recording::IRecorder& recorder) noexcept :
         executionQueue { executionQueue },
         orderManager { orderManager },
-        executionReportHandler { executionReportHandler }
+        recorder { recorder }
     {
     }
 
@@ -41,9 +41,10 @@ namespace trading::execution
 
     void ExecutionWorker::process(const ExecutionReport& report) const
     {
-        [[maybe_unused]]
-        const bool processed = executionReportHandler.onExecutionReport(report);
+        recorder.record(report);
 
+        [[maybe_unused]]
+        const bool processed = orderManager.applyExecution(report);
         // TODO: Handle unknown orders or invalid execution reports.
     }
 }
