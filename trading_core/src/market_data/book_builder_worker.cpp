@@ -9,6 +9,8 @@ Description : Processes market-data book updates on the BookBuilder thread.
 
 #include "book_builder_worker.hpp"
 
+#include <iostream>
+
 namespace trading::market_data
 {
     BookBuilderWorker::BookBuilderWorker(BookBuilder& bookBuilder,
@@ -22,6 +24,7 @@ namespace trading::market_data
 
     void BookBuilderWorker::run() const
     {
+        std::cout << __FUNCTION__ << std::endl;
         const Snapshot snapshot = snapshotProvider.getSnapshot();
         if (!bookBuilder.applySnapshot(snapshot))
             return;

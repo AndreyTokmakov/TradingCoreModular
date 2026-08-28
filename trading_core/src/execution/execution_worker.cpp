@@ -11,18 +11,23 @@ Description : Sends orders to the exchange on the execution thread.
 
 namespace trading::execution
 {
-    ExecutionWorker::ExecutionWorker(concurrency::Queue<OrderRequest>& orderQueue,
+    ExecutionWorker::ExecutionWorker(concurrency::Queue<ExecutionWorkItem>& executionQueue,
                                      OrderManager& orderManager):
-        orderQueue { orderQueue },
+        executionQueue { executionQueue },
         orderManager { orderManager }
     {
     }
 
     void ExecutionWorker::run() const
     {
-        OrderRequest request {};
-        while (orderQueue.waitPop(request)) {
-            orderManager.createOrder(request);
+        ExecutionWorkItem workItem;
+        while (executionQueue.waitPop(workItem))
+        {
+            if (const OrderRequest* request = std::get_if<OrderRequest>(&workItem))
+            {
+                // FIXME
+                const auto _  = orderManager.createOrder(*request);
+            }
         }
     }
 }

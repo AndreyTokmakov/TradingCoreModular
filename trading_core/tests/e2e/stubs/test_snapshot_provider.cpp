@@ -10,6 +10,7 @@ Description : Test market-data snapshot provider implementation.
 #include "test_snapshot_provider.hpp"
 
 #include <utility>
+#include <iostream>
 
 namespace trading::testing::stubs
 {
@@ -32,9 +33,11 @@ namespace trading::testing::stubs
 
     market_data::Snapshot TestSnapshotProvider::getSnapshot()
     {
+        std::cout << __FUNCTION__  << ":" << __LINE__ << std::endl;
         if (!fetchHandler)
             return {};
 
+        std::cout << __FUNCTION__  << ":" << __LINE__ << std::endl;
         return fetchHandler();
     }
 }

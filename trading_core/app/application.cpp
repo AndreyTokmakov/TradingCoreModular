@@ -92,20 +92,20 @@ Application::Application(const std::filesystem::path& configPath):
         binanceExecutionGateway {
             findExchange(config, "binance").executionEndpoint
         },
-        orderManager {                                                 // CPU-3:  OrderManager --> gateway.send() / cancel()
+        orderManager {                                                // CPU-3:  OrderManager --> gateway.send() / cancel()
             riskManager, positionManager, binanceExecutionGateway
         },
-        executionWorker {                                             // CPU-3: executionOrderQueue --> ExecutionWorker --> OrderManager::createOrder()
-            executionOrderQueue, orderManager
+        executionWorker {                                             // CPU-3: executionQueue --> ExecutionWorker --> OrderManager::createOrder()
+            executionQueue, orderManager
         },
         strategyExecutor {
-            executionOrderQueue, config.strategy.orderQuantity     // CPU-2: StrategyExecutor   --> executionOrderQueue::push()
+            executionQueue, config.strategy.orderQuantity          // CPU-2: StrategyExecutor   --> executionQueue::push()
         },
         strategyWorker {                                              // CPU-2: strategyEventQueue --> StrategyProcessor -> ImbalanceStrategy::evaluate()
             strategyEventQueue, strategy, strategyExecutor   //                                                 -> StrategyExecutor::execute()
         },
         executionReportHandler {
-            orderManager, positionManager, recorder
+            orderManager, positionManager, recorder          // FIXME: Запускать на отдельном CPU --> пихать в executionQueue ExecutionReport event-ы
         },
         executionReportSource {
             findExchange(config, "binance").executionEndpoint
@@ -119,8 +119,8 @@ Application::Application(const std::filesystem::path& configPath):
         binanceSnapshotProvider {
             findExchange(config, "binance").marketDataEndpoint
         },
-        bookBuilderWorker {
-            bookBuilder, binanceSnapshotProvider, bookUpdateQueue  // CPU-1: bookUpdateQueue    --> BookBuilderWorker --> BookBuilder
+        bookBuilderWorker {                                            // CPU-1: bookUpdateQueue    --> BookBuilderWorker --> BookBuilder
+            bookBuilder, binanceSnapshotProvider, bookUpdateQueue
         },
         recordingWorker {                                              // CPU-4:
             recorder, recordingEventQueue

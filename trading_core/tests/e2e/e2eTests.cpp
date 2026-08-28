@@ -77,7 +77,7 @@ namespace
         concurrency::ConditionVariableQueue<market_data::BookUpdates> bookUpdateQueue;
         concurrency::ConditionVariableQueue<market_data::MarketEvent> strategyEventQueue;
         concurrency::ConditionVariableQueue<market_data::MarketEvent> recordingEventQueue;
-        concurrency::ConditionVariableQueue<execution::OrderRequest>  executionOrderQueue;
+        concurrency::ConditionVariableQueue<execution::ExecutionWorkItem>  executionOrderQueue;
 
         config::Config config;
 
@@ -243,5 +243,6 @@ namespace
 
 void e2eTests()
 {
-
+    TestApplication test("../../trading_core/tests/e2e/config/test_local.json");
+    test.start();
 }
