@@ -15,6 +15,7 @@ Description : order_manager_test.cpp
 #include "condition_variable_queue.hpp"
 #include "execution_worker.hpp"
 #include "imbalance_strategy.hpp"
+#include "logger.hpp"
 #include "market_data_message_handler.hpp"
 #include "market_event_dispatcher.hpp"
 #include "metrics_collector.hpp"
@@ -36,7 +37,7 @@ Description : order_manager_test.cpp
 #include "e2e/stubs/test_snapshot_provider.hpp"
 
 
-namespace
+namespace e2e_tests
 {
     using trading::Price;
     using trading::Quantity;
@@ -52,6 +53,9 @@ namespace
     namespace position = trading::position;
     namespace strategy = trading::strategy;
     namespace risk = trading::risk;
+    namespace metrics = trading::metrics;
+    namespace logging = trading::logging;
+    namespace common = trading::common;
 
     using config::Config;
     using config::Error;
@@ -84,7 +88,10 @@ namespace
         concurrency::ConditionVariableQueue<market_data::MarketEvent> recordingEventQueue;
         concurrency::ConditionVariableQueue<execution::ExecutionWorkItem>  executionOrderQueue;
 
-        trading::metrics::MetricsCollector& metricsCollector;
+        metrics::MetricsCollector& metricsCollector;
+        std::shared_ptr<logging::ILogger> logger;
+        common::RuntimeContext runtimeContext;
+
         Config config;
 
         market_data::OrderBook orderBook;
@@ -118,7 +125,7 @@ namespace
 }
 
 
-namespace
+namespace e2e_tests
 {
     [[nodiscard]]
     Config loadConfig(const std::filesystem::path& configPath)
@@ -144,7 +151,14 @@ namespace
     }
 
     TestApplication::TestApplication(const std::filesystem::path& configPath):
-            metricsCollector {  trading::metrics::MetricsCollector::getCollector() },
+            metricsCollector { metrics::MetricsCollector::getCollector() },
+                logger {
+                logging::LoggerFactory::createLogger({}, {})
+            },
+            runtimeContext {
+                .logger = *logger,
+                .metricsCollector = metricsCollector
+            },
             config { loadConfig(configPath) },
             orderBook {},
             recorder {},
@@ -161,7 +175,7 @@ namespace
                 riskManager, positionManager, testExecutionGateway
             },
             executionWorker {                                             // CPU-3: executionOrderQueue --> ExecutionWorker --> OrderManager::createOrder()
-                executionOrderQueue, orderManager, recorder, metricsCollector
+                executionOrderQueue, orderManager, recorder, runtimeContext
             },
             strategyExecutor {
                 executionOrderQueue, config.strategy.orderQuantity     // CPU-2: StrategyExecutor   --> executionOrderQueue::push()
@@ -187,12 +201,14 @@ namespace
             recordingWorker {                                              // CPU-4:
                 recorder, recordingEventQueue
             },
-            testMarketDataParser {},                                           // CPU-0:  MarketDataMessageHandler  --> BinanceMarketDataParser -- > bookUpdateQueue.push();
+
+
+            testMarketDataParser {},                                       // CPU-0:  MarketDataMessageHandler  --> BinanceMarketDataParser -- > bookUpdateQueue.push();
             marketDataMessageHandler {                                     // CPU-0:  MarketDataSource --> MarketDataMessageHandler
                 testMarketDataParser, bookUpdateQueue
             },
             testMarketDataSource {                                             // CPU-0:  Exchange --> MarketDataSource
-                findExchange(config, "binance").marketDataEndpoint
+                findExchange(config, "binance").marketDataEndpoint, runtimeContext
             }
         {
             configureMarketData();
@@ -218,12 +234,12 @@ namespace
 
         bookBuilderWorker.start();       // CPU-1
         strategyWorker.start();
+        executionWorker.start();
 
         std::this_thread::sleep_for(std::chrono::seconds { 1 });
 
         testMarketDataSource.start();    // CPU-0
 
-        // executionWorker.start();
         // recordingWorker.start();
         // testExecutionReportSource.start();
     }
@@ -265,6 +281,6 @@ namespace
 
 void e2eTests()
 {
-    TestApplication test("../../trading_core/tests/e2e/config/test_local.json");
+    e2e_tests::TestApplication test("../../trading_core/tests/e2e/config/test_local.json");
     test.start();
 }

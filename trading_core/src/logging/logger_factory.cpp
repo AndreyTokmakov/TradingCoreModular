@@ -12,7 +12,7 @@ Description : Factory for creating the trading system logger.
 
 namespace trading::logging
 {
-    std::shared_ptr<Logger>
+    std::shared_ptr<ILogger>
     LoggerFactory::createLogger(const LoggingConfiguration& configuration, AccessKey)
     {
         return std::make_shared<SpdlogLogger>(configuration);

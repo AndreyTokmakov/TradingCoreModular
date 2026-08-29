@@ -16,10 +16,9 @@ namespace trading::metrics
 {
     enum class MetricType : uint16_t
     {
-        OrderRequestsReceived,
-        OrdersCreated,
-        OrdersRejected,
-
+        OrderRequests,
+        ExecutionReport,
+        MarketDataReceived,
         _Count
     };
 }

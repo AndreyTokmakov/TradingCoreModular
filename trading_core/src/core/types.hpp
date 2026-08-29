@@ -10,7 +10,7 @@ Description : types.hpp
 #ifndef FINANCETECHNOLOGYPROJECTS_TYPES_HPP
 #define FINANCETECHNOLOGYPROJECTS_TYPES_HPP
 
-#include <cstdint>
+#include <iostream>
 
 namespace trading
 {

@@ -33,6 +33,7 @@ include_directories(${THIRD_PARTY_DIR}/json/include)
 include_directories(${THIRD_PARTY_DIR}/spdlog/include)
 
 
+
 set(PROJECT_DIR ${CMAKE_SOURCE_DIR}/${PROJECT_NAME})
 
 set(APP         ${PROJECT_DIR}/app)
@@ -82,6 +83,7 @@ add_executable(${PROJECT_NAME}
         ${COMMON}/condition_variable_queue.hpp
         ${COMMON}/ring_buffer.hpp
         ${COMMON}/worker.hpp
+        ${COMMON}/runtime_context.hpp
 
         ${CONFIG}/config.hpp
         ${CONFIG}/json_config_loader.hpp
@@ -104,7 +106,7 @@ add_executable(${PROJECT_NAME}
         ${METRICS}/metrics.hpp
         ${METRICS}/metric_type.hpp
         ${METRICS}/metrics_collector.hpp
-
+        ${METRICS}/metrics_collector.cpp
         # ${METRICS}/hugh_resolution_timer.hpp
 
         ${MARKET_DATA}/interfaces/market_event_handler.hpp

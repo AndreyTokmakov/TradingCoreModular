@@ -72,7 +72,6 @@ Description : application.hpp
 #include "imbalance_strategy.hpp"
 #include "market_data_message_handler.hpp"
 #include "market_event_dispatcher.hpp"
-#include "metrics_collector.hpp"
 #include "order_book.hpp"
 #include "order_manager.hpp"
 #include "position_manager.hpp"
@@ -109,6 +108,9 @@ namespace trading::app
         concurrency::ConditionVariableQueue<execution::ExecutionWorkItem>  executionQueue;
 
         metrics::MetricsCollector& metricsCollector;
+        std::shared_ptr<logging::ILogger> logger;
+        common::RuntimeContext runtimeContext;
+
         config::Config config;
 
         market_data::OrderBook orderBook;

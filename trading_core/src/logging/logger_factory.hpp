@@ -19,6 +19,10 @@ namespace trading::app {
     class Application;
 }
 
+namespace e2e_tests {
+    class TestApplication;
+}
+
 namespace trading::logging
 {
     class LoggerFactory
@@ -26,6 +30,7 @@ namespace trading::logging
         class AccessKey
         {
             friend class app::Application;
+            friend class e2e_tests::TestApplication;
 
             AccessKey() = default;
             AccessKey(AccessKey const&) = default;
@@ -34,8 +39,8 @@ namespace trading::logging
     public:
 
         [[nodiscard]]
-        static std::shared_ptr<Logger> createLogger(const LoggingConfiguration& configuration,
-                                                    const AccessKey accessKey);
+        static std::shared_ptr<ILogger> createLogger(const LoggingConfiguration& configuration,
+                                                     AccessKey accessKey);
     };
 }
 

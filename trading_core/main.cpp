@@ -35,8 +35,7 @@ void trading_inbound_integration_test();
 void e2eTests();
 
 // TODO:
-//   Metrics
-//   Workers Thrads Affinity
+//   Workers Threads Affinity
 
 // TODO: - Config
 //  - Risk
@@ -48,6 +47,10 @@ void e2eTests();
 
 // TODO: - Improvements
 //  - Заменить std::map<K,V> для PriceLevel-ов ---> DenseMap
+
+// TODO: Metics
+//  - Put Collection on CPU-5
+//  - Grafana
 
 
 namespace

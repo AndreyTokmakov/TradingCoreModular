@@ -27,31 +27,13 @@ namespace trading::metrics
         MetricsCollector& operator=(MetricsCollector&&) = delete;
 
         [[nodiscard]]
-        Metrics& getThreadMetrics() noexcept
-        {
-            std::lock_guard<std::mutex> lock{mutex};
-            thread_local Metrics &metrics = allMetrics.emplace_back();
-            return metrics;
-        }
+        Metrics& getThreadMetrics() noexcept;
 
         [[nodiscard]]
-        static MetricsCollector& getCollector() noexcept
-        {
-            static MetricsCollector metrics_collector;
-            return metrics_collector;
-        }
+        static MetricsCollector& getCollector() noexcept;
 
         [[maybe_unused]]
-        void aggregate() const
-        {
-            Metrics stats;
-            {
-                std::lock_guard<std::mutex> lock{mutex};
-                for (const auto &metric : allMetrics){
-                    stats += metric;
-                }
-            }
-        }
+        void aggregate() const;
 
     private:
 

@@ -76,27 +76,33 @@ namespace trading::logging
 
     SpdlogLogger::~SpdlogLogger() = default;
 
-    void SpdlogLogger::trace(const std::string_view message){
-        impl->logger->log(spdlog::level::trace, fmt::runtime(message));
+    void SpdlogLogger::traceImpl(const std::string message)
+    {
+        impl->logger->trace(message);
     }
 
-    void SpdlogLogger::debug(const std::string_view message) {
-        impl->logger->log(spdlog::level::debug, fmt::runtime(message));
+    void SpdlogLogger::debugImpl(const std::string message)
+    {
+        impl->logger->debug(message);
     }
 
-    void SpdlogLogger::info(const std::string_view message) {
-        impl->logger->log(spdlog::level::info, fmt::runtime(message));
+    void SpdlogLogger::infoImpl(const std::string message)
+    {
+        impl->logger->info(message);
     }
 
-    void SpdlogLogger::warn(const std::string_view message) {
-        impl->logger->log(spdlog::level::warn, fmt::runtime(message));
+    void SpdlogLogger::warnImpl(const std::string message)
+    {
+        impl->logger->warn(message);
     }
 
-    void SpdlogLogger::error(const std::string_view message) {
-        impl->logger->log(spdlog::level::err, fmt::runtime(message));
+    void SpdlogLogger::errorImpl(const std::string message)
+    {
+        impl->logger->error(message);
     }
 
-    void SpdlogLogger::critical(const std::string_view message) {
-        impl->logger->log(spdlog::level::critical, fmt::runtime(message));
+    void SpdlogLogger::criticalImpl(const std::string message)
+    {
+        impl->logger->critical(message);
     }
 }

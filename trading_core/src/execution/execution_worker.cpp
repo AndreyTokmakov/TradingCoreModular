@@ -8,23 +8,26 @@ Description : Sends orders to the exchange on the execution thread.
 ============================================================================**/
 
 #include "execution_worker.hpp"
+#include "logger_factory.hpp"
 
 namespace trading::execution
 {
     ExecutionWorker::ExecutionWorker(concurrency::Queue<ExecutionWorkItem>& executionQueue,
                                     OrderManager& orderManager,
                                     recording::IRecorder& recorder,
-                                    metrics::MetricsCollector& metricsCollector) noexcept :
+                                    const common::RuntimeContext& runtimeContext) noexcept:
         executionQueue { executionQueue },
         orderManager { orderManager },
         recorder { recorder },
-        metrics { metricsCollector.getThreadMetrics() }
+        logger { runtimeContext.logger },
+        metricsCollector { runtimeContext.metricsCollector }
     {
-
+        // logger = L
     }
 
-    void ExecutionWorker::run() const
+    void ExecutionWorker::run()
     {
+        metrics = &metricsCollector.getThreadMetrics();
         ExecutionWorkItem workItem;
         while (executionQueue.waitPop(workItem))
         {
@@ -36,14 +39,19 @@ namespace trading::execution
 
     void ExecutionWorker::process(const OrderRequest& request) const
     {
+        logger.info("{} [{}]", __PRETTY_FUNCTION__, __LINE__);
+        metrics->increment<metrics::MetricType::OrderRequests>();
+
         [[maybe_unused]]
         const OrderCreationResult result = orderManager.createOrder(request);
 
+        logger.info("{} [{}]", __PRETTY_FUNCTION__, __LINE__);
         // TODO: Handle order creation errors: logging / metrics / risk event.
     }
 
     void ExecutionWorker::process(const ExecutionReport& report) const
     {
+        metrics->increment<metrics::MetricType::ExecutionReport>();
         recorder.record(report);
 
         [[maybe_unused]]

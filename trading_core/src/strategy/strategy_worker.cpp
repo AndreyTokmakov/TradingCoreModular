@@ -20,7 +20,6 @@ namespace trading::strategy
     {
     }
 
-
     void StrategyWorker::run() const
     {
         market_data::MarketEvent event {};

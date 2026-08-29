@@ -16,6 +16,9 @@ Description : Collection of counters for a single execution thread.
 #include <array>
 #include <cstddef>
 
+#include "ThreadUtilities.hpp"         // NOTE: Remove
+#include <iostream>                    // NOTE: Remove
+
 namespace trading::metrics
 {
     class Metrics
@@ -32,6 +35,7 @@ namespace trading::metrics
         void increment(const counter_type value = 1) noexcept
         {
             counters[toIndex(type)].increment(value);
+            std::cout << utilities::threading::getCpu() << std::endl;     // NOTE: Remove
         }
 
         template<MetricType type>

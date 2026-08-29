@@ -17,7 +17,7 @@ Description : Asynchronous spdlog based Logger implementation.
 
 namespace trading::logging
 {
-    class SpdlogLogger final : public Logger
+    class SpdlogLogger final : public ILogger
     {
     public:
         explicit SpdlogLogger(const LoggingConfiguration& configuration);
@@ -30,16 +30,18 @@ namespace trading::logging
         SpdlogLogger(SpdlogLogger&&) = delete;
         SpdlogLogger& operator=(SpdlogLogger&&) = delete;
 
-        void trace(std::string_view message) override;
-        void debug(std::string_view message) override;
-        void info(std::string_view message) override;
-        void warn(std::string_view message) override;
-        void error(std::string_view message) override;
-        void critical(std::string_view message) override;
+    private:
+
+        void traceImpl(std::string message) override;
+        void debugImpl(std::string message) override;
+        void infoImpl(std::string message) override;
+        void warnImpl(std::string message) override;
+        void errorImpl(std::string message) override;
+        void criticalImpl(std::string message) override;
 
     private:
+        
         class Impl;
-
         std::unique_ptr<Impl> impl;
     };
 }

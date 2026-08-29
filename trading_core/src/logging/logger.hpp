@@ -11,20 +11,59 @@ Description : Logging abstraction used by the trading system.
 #define FINANCETECHNOLOGYPROJECTS_LOGGER_HPP
 
 #include <string_view>
+#include <spdlog/spdlog.h>
+#include <spdlog/version.h>
 
 namespace trading::logging
 {
-    class Logger
+    class ILogger
     {
     public:
-        virtual ~Logger() = default;
+        virtual ~ILogger() = default;
 
-        virtual void trace(std::string_view message) = 0;
-        virtual void debug(std::string_view message) = 0;
-        virtual void info(std::string_view message) = 0;
-        virtual void warn(std::string_view message) = 0;
-        virtual void error(std::string_view message) = 0;
-        virtual void critical(std::string_view message) = 0;
+        template<typename... Args>
+        void trace(fmt::format_string<Args...> format, Args&&... args)
+        {
+            traceImpl(fmt::format(format, std::forward<Args>(args)...));
+        }
+
+        template<typename... Args>
+        void debug(fmt::format_string<Args...> format, Args&&... args)
+        {
+            debugImpl(fmt::format(format, std::forward<Args>(args)...));
+        }
+
+        template<typename... Args>
+        void info(fmt::format_string<Args...> format, Args&&... args)
+        {
+            infoImpl(fmt::format(format, std::forward<Args>(args)...));
+        }
+
+        template<typename... Args>
+        void warn(fmt::format_string<Args...> format, Args&&... args)
+        {
+            warnImpl(fmt::format(format, std::forward<Args>(args)...));
+        }
+
+        template<typename... Args>
+        void error(fmt::format_string<Args...> format, Args&&... args)
+        {
+            errorImpl(fmt::format(format, std::forward<Args>(args)...));
+        }
+
+        template<typename... Args>
+        void critical(fmt::format_string<Args...> format, Args&&... args)
+        {
+            criticalImpl(fmt::format(format, std::forward<Args>(args)...));
+        }
+
+    private:
+        virtual void traceImpl(std::string message) = 0;
+        virtual void debugImpl(std::string message) = 0;
+        virtual void infoImpl(std::string message) = 0;
+        virtual void warnImpl(std::string message) = 0;
+        virtual void errorImpl(std::string message) = 0;
+        virtual void criticalImpl(std::string message) = 0;
     };
 }
 
