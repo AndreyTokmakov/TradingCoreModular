@@ -13,11 +13,14 @@ namespace trading::execution
 {
     ExecutionWorker::ExecutionWorker(concurrency::Queue<ExecutionWorkItem>& executionQueue,
                                     OrderManager& orderManager,
-                                    recording::IRecorder& recorder) noexcept :
+                                    recording::IRecorder& recorder,
+                                    metrics::MetricsCollector& metricsCollector) noexcept :
         executionQueue { executionQueue },
         orderManager { orderManager },
-        recorder { recorder }
+        recorder { recorder },
+        metrics { metricsCollector.getThreadMetrics() }
     {
+
     }
 
     void ExecutionWorker::run() const

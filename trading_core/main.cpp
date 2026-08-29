@@ -46,13 +46,9 @@ void e2eTests();
 //  - Trading Pairs
 //  - StrategyConfig
 
+// TODO: - Improvements
+//  - Заменить std::map<K,V> для PriceLevel-ов ---> DenseMap
 
-/*
-tests/
-├── integration
-│   ├── market_data_to_strategy_test.cpp
-│   └── order_execution_flow_test.cpp
-*/
 
 namespace
 {

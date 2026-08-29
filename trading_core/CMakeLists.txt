@@ -42,15 +42,16 @@ set(TESTS       ${PROJECT_DIR}/tests)
 set(COMMON      ${SOURCES}/common)
 set(CONFIG      ${SOURCES}/config)
 set(CORE        ${SOURCES}/core)
-set(MARKET_DATA ${SOURCES}/market_data)
-set(LOGGING     ${SOURCES}/logging)
 set(EXECUTION   ${SOURCES}/execution)
 set(EXCHANGES   ${SOURCES}/exchanges)
-set(STRATEGY    ${SOURCES}/strategy)
+set(LOGGING     ${SOURCES}/logging)
+set(MARKET_DATA ${SOURCES}/market_data)
+set(METRICS     ${SOURCES}/metrics)
 set(POSITION    ${SOURCES}/position)
-set(RECORDING   ${SOURCES}/recording)
 set(PNL         ${SOURCES}/pnl)
+set(RECORDING   ${SOURCES}/recording)
 set(RISK        ${SOURCES}/risk)
+set(STRATEGY    ${SOURCES}/strategy)
 
 set(BINANCE     ${EXCHANGES}/binance)
 
@@ -60,6 +61,7 @@ include_directories(${COMMON})
 include_directories(${MARKET_DATA})
 include_directories(${MARKET_DATA}/model)
 include_directories(${MARKET_DATA}/interfaces)
+include_directories(${METRICS})
 include_directories(${EXECUTION})
 include_directories(${STRATEGY})
 include_directories(${POSITION})
@@ -98,6 +100,13 @@ add_executable(${PROJECT_NAME}
         ${MARKET_DATA}/model/order_book_levels.hpp
         ${MARKET_DATA}/model/snapshot.hpp
 
+        ${METRICS}/counter.hpp
+        ${METRICS}/metrics.hpp
+        ${METRICS}/metric_type.hpp
+        ${METRICS}/metrics_collector.hpp
+
+        # ${METRICS}/hugh_resolution_timer.hpp
+
         ${MARKET_DATA}/interfaces/market_event_handler.hpp
         ${MARKET_DATA}/interfaces/market_data_parser.hpp
         ${MARKET_DATA}/interfaces/market_data_source.hpp
@@ -114,8 +123,7 @@ add_executable(${PROJECT_NAME}
         ${MARKET_DATA}/book_builder_worker.cpp
         ${MARKET_DATA}/book_builder.hpp
         ${MARKET_DATA}/book_builder.cpp
-        # ${MARKET_DATA}/market_event_handler.hpp
-        # ${MARKET_DATA}/market_event_handler.cpp
+
 
         ${LOGGING}/logger.hpp
         ${LOGGING}/spdlog_logger.hpp

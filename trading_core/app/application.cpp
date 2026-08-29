@@ -80,6 +80,7 @@ namespace
 namespace trading::app
 {
 Application::Application(const std::filesystem::path& configPath):
+        metricsCollector {  metrics::MetricsCollector::getCollector() },
         config { loadConfig(configPath) },
         orderBook {},
         recorder {},
@@ -96,7 +97,7 @@ Application::Application(const std::filesystem::path& configPath):
             riskManager, positionManager, binanceExecutionGateway
         },
         executionWorker {                                             // CPU-3: executionQueue --> ExecutionWorker --> OrderManager::createOrder()
-            executionQueue, orderManager, recorder
+            executionQueue, orderManager, recorder, metricsCollector
         },
         strategyExecutor {
             executionQueue, config.strategy.orderQuantity          // CPU-2: StrategyExecutor   --> executionQueue::push()

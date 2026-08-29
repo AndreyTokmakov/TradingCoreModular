@@ -12,6 +12,7 @@ Description : Sends orders to the exchange on the execution thread.
 
 #include "recorder.hpp"
 #include "execution_work_item.hpp"
+#include "metrics_collector.hpp"
 #include "order_manager.hpp"
 #include "queue.hpp"
 #include "worker.hpp"
@@ -23,7 +24,8 @@ namespace trading::execution
     public:
         ExecutionWorker(concurrency::Queue<ExecutionWorkItem>& executionQueue,
                         OrderManager& orderManager,
-                        recording::IRecorder& recorder) noexcept;
+                        recording::IRecorder& recorder,
+                        metrics::MetricsCollector& metricsCollector) noexcept;
 
         void run() const;
 
@@ -35,6 +37,7 @@ namespace trading::execution
         concurrency::Queue<ExecutionWorkItem>& executionQueue;
         OrderManager& orderManager;
         recording::IRecorder& recorder;
+        metrics::Metrics& metrics;
     };
 }
 

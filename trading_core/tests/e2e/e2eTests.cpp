@@ -17,6 +17,7 @@ Description : order_manager_test.cpp
 #include "imbalance_strategy.hpp"
 #include "market_data_message_handler.hpp"
 #include "market_event_dispatcher.hpp"
+#include "metrics_collector.hpp"
 #include "order_book.hpp"
 #include "order_manager.hpp"
 #include "position_manager.hpp"
@@ -83,7 +84,8 @@ namespace
         concurrency::ConditionVariableQueue<market_data::MarketEvent> recordingEventQueue;
         concurrency::ConditionVariableQueue<execution::ExecutionWorkItem>  executionOrderQueue;
 
-        config::Config config;
+        trading::metrics::MetricsCollector& metricsCollector;
+        Config config;
 
         market_data::OrderBook orderBook;
         recording::TradeRecorder recorder;
@@ -142,6 +144,7 @@ namespace
     }
 
     TestApplication::TestApplication(const std::filesystem::path& configPath):
+            metricsCollector {  trading::metrics::MetricsCollector::getCollector() },
             config { loadConfig(configPath) },
             orderBook {},
             recorder {},
@@ -158,7 +161,7 @@ namespace
                 riskManager, positionManager, testExecutionGateway
             },
             executionWorker {                                             // CPU-3: executionOrderQueue --> ExecutionWorker --> OrderManager::createOrder()
-                executionOrderQueue, orderManager, recorder
+                executionOrderQueue, orderManager, recorder, metricsCollector
             },
             strategyExecutor {
                 executionOrderQueue, config.strategy.orderQuantity     // CPU-2: StrategyExecutor   --> executionOrderQueue::push()
